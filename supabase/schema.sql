@@ -38,9 +38,12 @@ create table if not exists reading_sets (
   start_date date not null,
   end_date date not null check (end_date >= start_date),
   rest_days integer[] not null default '{}', -- 0=Sun..6=Sat
+  is_active boolean not null default true, -- user-paused sets are inactive but kept
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table reading_sets add column if not exists is_active boolean not null default true;
 
 alter table reading_sets enable row level security;
 drop policy if exists "Users manage their own sets" on reading_sets;

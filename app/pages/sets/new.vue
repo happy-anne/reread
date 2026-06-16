@@ -16,7 +16,7 @@ const saving = ref(false);
 
 const form = reactive({
   name: "",
-  reread_count: 2,
+  reread_count: 1,
   start_date: toLocalDateStr(new Date()),
   end_date: "",
   rest_days: [] as number[],
@@ -227,11 +227,11 @@ onMounted(() => {
             :key="idx"
             type="button"
             @click="toggleRestDay(idx)"
-            class="flex-1 py-2 rounded-lg text-xs font-medium transition-colors"
+            class="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors border-2"
             :class="
               form.rest_days.includes(idx)
-                ? 'bg-slate-600 text-slate-300'
-                : 'bg-slate-800 border border-slate-700 text-slate-400 hover:border-slate-500'
+                ? 'bg-emerald-500 border-emerald-500 text-slate-950'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'
             "
           >
             {{ label }}

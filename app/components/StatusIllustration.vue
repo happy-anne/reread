@@ -9,24 +9,28 @@ const config = {
     glow: "bg-emerald-400/15",
     fg: "text-emerald-400",
     label: "Completed",
+    message: "대단해요! 오늘도 스스로와의 약속을 지켜냈어요.",
   },
   partial: {
     ring: "stroke-yellow-400",
     glow: "bg-yellow-400/15",
     fg: "text-yellow-400",
     label: "Partial",
+    message: "천천히 가도 괜찮아요. 오늘도 앞으로 나아갔어요.",
   },
   not_done: {
     ring: "stroke-slate-600",
     glow: "bg-slate-600/10",
     fg: "text-slate-500",
     label: "Not started",
+    message: "괜찮아요. 내일 다시 펼치면 그걸로 충분해요.",
   },
   passed: {
     ring: "stroke-sky-400",
     glow: "bg-sky-400/15",
     fg: "text-sky-400",
     label: "Passed",
+    message: "쉬어가는 하루도 독서 여정의 일부예요.",
   },
 }[props.status];
 </script>
@@ -75,5 +79,6 @@ const config = {
       </svg>
     </div>
     <p class="text-sm font-medium mt-2" :class="config.fg">{{ config.label }}</p>
+    <p class="text-xs text-slate-400 mt-1 text-center px-4 leading-relaxed">{{ config.message }}</p>
   </div>
 </template>

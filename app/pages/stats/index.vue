@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import type { ReadingLog, ReadingSet } from "~/types";
+import type { ReadingLog, ReadingSet, ReadingSetItem } from "~/types";
+import { calcTotalPages } from "~/composables/useScheduler";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
 const monthLogs = ref<ReadingLog[]>([]); // logs for the visible calendar month
 const allLogs = ref<ReadingLog[]>([]); // all-time logs, for streak + cumulative stats
-const sets = ref<ReadingSet[]>([]);
+const sets = ref<(ReadingSet & { items: ReadingSetItem[] })[]>([]);
+const selectedSetId = ref<string>("");
 
 const now = new Date();
 const currentMonth = ref(
@@ -77,16 +79,29 @@ const stats = computed(() => {
   return { completed, totalLogged, totalPages, streak, completedSets };
 });
 
-// Current re-read progress: pages read so far / total pages across active sets
-const currentSetProgress = computed(() => {
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const active = sets.value.filter((s) => s.start_date <= today && s.end_date >= today);
-  if (active.length === 0) return null;
+// Sets shown in the selector: active first, then by most recent
+const selectableSets = computed(() => {
+  return [...sets.value].sort((a, b) => {
+    if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
+    return b.created_at.localeCompare(a.created_at);
+  });
+});
 
-  const set = active[0]!;
+// Progress for the selected set: pages read so far / total pages across all reread rounds
+const selectedSetProgress = computed(() => {
+  const set = sets.value.find((s) => s.id === selectedSetId.value);
+  if (!set) return null;
+
   const setLogs = allLogs.value.filter((l) => l.set_id === set.id && l.actual_page != null);
   const pagesRead = setLogs.reduce((sum, l) => sum + (l.actual_page! - l.target_start_page + 1), 0);
-  return { name: set.name, pagesRead };
+  const totalPages = calcTotalPages(set.items ?? [], set.reread_count);
+  const percent = totalPages > 0 ? Math.min(100, (pagesRead / totalPages) * 100) : 0;
+
+  return { name: set.name, pagesRead, totalPages, percent };
+});
+
+watch(selectableSets, (list) => {
+  if (!selectedSetId.value && list.length > 0) selectedSetId.value = list[0]!.id;
 });
 
 function prevMonth() {
@@ -123,10 +138,13 @@ async function fetchAll() {
   if (!user.value) return;
   const [{ data: logs }, { data: setsData }] = await Promise.all([
     supabase.from("reading_logs").select("*").eq("user_id", user.value.id),
-    supabase.from("reading_sets").select("*").eq("user_id", user.value.id),
+    supabase
+      .from("reading_sets")
+      .select("*, items:reading_set_items(*, book:books(*))")
+      .eq("user_id", user.value.id),
   ]);
   allLogs.value = (logs as ReadingLog[]) ?? [];
-  sets.value = (setsData as ReadingSet[]) ?? [];
+  sets.value = (setsData as any[]) ?? [];
   await fetchMonthLogs();
 }
 
@@ -137,11 +155,26 @@ onMounted(fetchAll);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <h1 class="text-2xl font-bold mb-6">Statistics</h1>
 
-    <!-- Current set progress -->
-    <div v-if="currentSetProgress" class="bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-4">
-      <p class="text-xs text-slate-400 mb-1">Current set</p>
-      <p class="font-semibold mb-2">{{ currentSetProgress.name }}</p>
-      <p class="text-emerald-400 text-sm">{{ currentSetProgress.pagesRead.toLocaleString() }} pages read</p>
+    <!-- Set progress -->
+    <div v-if="selectableSets.length > 0" class="bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-4">
+      <select
+        v-model="selectedSetId"
+        class="w-full bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 mb-4"
+      >
+        <option v-for="set in selectableSets" :key="set.id" :value="set.id">
+          {{ set.name }}{{ set.is_active ? "" : " (Paused)" }}
+        </option>
+      </select>
+
+      <div v-if="selectedSetProgress" class="flex items-center gap-5">
+        <DonutProgress :percent="selectedSetProgress.percent" :size="100" />
+        <div>
+          <p class="font-semibold mb-1">{{ selectedSetProgress.name }}</p>
+          <p class="text-emerald-400 text-sm">
+            {{ selectedSetProgress.pagesRead.toLocaleString() }} / {{ selectedSetProgress.totalPages.toLocaleString() }} pages
+          </p>
+        </div>
+      </div>
     </div>
 
     <!-- Stats cards -->

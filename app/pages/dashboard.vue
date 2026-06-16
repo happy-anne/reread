@@ -29,6 +29,7 @@ async function fetchData() {
     .from("reading_sets")
     .select("*, items:reading_set_items(*, book:books(*))")
     .eq("user_id", user.value.id)
+    .eq("is_active", true)
     .lte("start_date", today)
     .gte("end_date", today);
 
@@ -168,8 +169,12 @@ onMounted(fetchData);
       </NuxtLink>
     </div>
 
-    <div v-else class="space-y-8">
-      <div v-for="{ set_id, schedule } in todaySchedules" :key="set_id">
+    <div v-else class="space-y-5">
+      <div
+        v-for="{ set_id, schedule } in todaySchedules"
+        :key="set_id"
+        class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6"
+      >
         <!-- Status illustration -->
         <StatusIllustration :status="getStatus(set_id)" />
 
@@ -180,7 +185,7 @@ onMounted(fetchData);
 
         <!-- Book + Range -->
         <h2 class="text-center text-lg font-semibold mt-1">{{ schedule.book_title }}</h2>
-        <p class="text-center text-emerald-400 text-2xl font-bold mt-1 mb-6">
+        <p class="text-center text-emerald-400 text-2xl font-bold mt-1 mb-6 break-words">
           p{{ schedule.start_page }} – p{{ schedule.end_page }}
           <span class="text-sm text-slate-400 font-normal ml-1">({{ schedule.pages_count }}p)</span>
         </p>
@@ -204,7 +209,7 @@ onMounted(fetchData);
         </div>
 
         <!-- Direct input -->
-        <div class="flex gap-2 items-center justify-center">
+        <div class="flex flex-wrap gap-2 items-center justify-center">
           <span class="text-sm text-slate-500">or type page</span>
           <input
             v-model.number="pageInput[set_id]"

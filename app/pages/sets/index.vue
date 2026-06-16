@@ -18,13 +18,27 @@ async function fetchSets() {
   loading.value = false;
 }
 
+// Active sets first (newest first), inactive (paused) sets always sink to the bottom
+const sortedSets = computed(() => {
+  return [...sets.value].sort((a, b) => {
+    if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
+    return b.created_at.localeCompare(a.created_at);
+  });
+});
+
 async function deleteSet(id: string) {
   if (!confirm("Delete this reading set?")) return;
   await supabase.from("reading_sets").delete().eq("id", id);
   await fetchSets();
 }
 
+async function toggleActive(set: ReadingSet) {
+  await supabase.from("reading_sets").update({ is_active: !set.is_active }).eq("id", set.id);
+  await fetchSets();
+}
+
 function getStatus(set: ReadingSet) {
+  if (!set.is_active) return { label: "Paused", color: "text-slate-500" };
   const today = new Date().toISOString().slice(0, 10);
   if (set.end_date < today) return { label: "Completed", color: "text-emerald-400" };
   if (set.start_date > today) return { label: "Upcoming", color: "text-blue-400" };
@@ -56,9 +70,10 @@ onMounted(fetchSets);
 
     <div v-else class="space-y-3">
       <div
-        v-for="set in sets"
+        v-for="set in sortedSets"
         :key="set.id"
-        class="bg-slate-800 rounded-2xl px-5 py-4 border border-slate-700"
+        class="rounded-2xl px-5 py-4 border transition-opacity"
+        :class="set.is_active ? 'bg-slate-800 border-slate-700' : 'bg-slate-800/50 border-slate-800 opacity-60'"
       >
         <div class="flex items-start justify-between mb-2">
           <div>
@@ -67,7 +82,7 @@ onMounted(fetchSets);
               {{ set.reread_count }}x • {{ set.start_date }} ~ {{ set.end_date }}
             </p>
           </div>
-          <span class="text-xs" :class="getStatus(set).color">{{ getStatus(set).label }}</span>
+          <span class="text-xs whitespace-nowrap ml-2" :class="getStatus(set).color">{{ getStatus(set).label }}</span>
         </div>
 
         <div class="flex flex-wrap gap-1 mb-3">
@@ -87,6 +102,17 @@ onMounted(fetchSets);
           >
             Edit
           </NuxtLink>
+          <button
+            @click="toggleActive(set)"
+            class="flex-1 text-sm py-1.5 rounded-lg transition-colors"
+            :class="
+              set.is_active
+                ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+                : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'
+            "
+          >
+            {{ set.is_active ? "Pause" : "Resume" }}
+          </button>
           <button
             @click="deleteSet(set.id)"
             class="flex-1 text-sm bg-slate-700 hover:bg-red-900/30 text-red-400 hover:text-red-300 py-1.5 rounded-lg transition-colors"
