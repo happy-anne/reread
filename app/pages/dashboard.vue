@@ -175,23 +175,19 @@ onMounted(fetchData);
         :key="set_id"
         class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6"
       >
-        <!-- Status illustration -->
-        <StatusIllustration :status="getStatus(set_id)" />
-
-        <!-- Set name -->
-        <p class="text-center text-xs text-slate-500 font-medium mt-4">
+        <!-- Set name + round (top of card) -->
+        <p class="text-center text-xs text-slate-500 font-medium mb-4">
           {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
         </p>
 
-        <!-- Book + Range -->
-        <h2 class="text-center text-lg font-semibold mt-1">{{ schedule.book_title }}</h2>
-        <p class="text-center text-emerald-400 text-2xl font-bold mt-1 mb-6 break-words">
-          p{{ schedule.start_page }} – p{{ schedule.end_page }}
-          <span class="text-sm text-slate-400 font-normal ml-1">({{ schedule.pages_count }}p)</span>
-        </p>
+        <!-- Status illustration -->
+        <StatusIllustration :status="getStatus(set_id)" />
 
-        <!-- Quick page buttons -->
-        <div class="flex flex-wrap justify-center gap-2 mb-3">
+        <!-- Book -->
+        <h2 class="text-center text-lg font-semibold mt-4 mb-6">{{ schedule.book_title }}</h2>
+
+        <!-- Page buttons + inline direct input -->
+        <div class="flex flex-wrap justify-center gap-2">
           <button
             v-for="p in range(schedule.start_page, schedule.end_page)"
             :key="p"
@@ -206,23 +202,20 @@ onMounted(fetchData);
           >
             {{ p }}
           </button>
-        </div>
 
-        <!-- Direct input -->
-        <div class="flex flex-wrap gap-2 items-center justify-center">
-          <span class="text-sm text-slate-500">or type page</span>
           <input
             v-model.number="pageInput[set_id]"
             type="number"
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
-            placeholder="0"
-            class="w-16 text-center bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-sm outline-none focus:border-emerald-500"
+            placeholder="…"
+            class="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
           <button
-            @click="pageInput[set_id] && saveProgress(set_id, schedule, pageInput[set_id]!)"
-            :disabled="saving[set_id] || !pageInput[set_id]"
-            class="bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm transition-colors"
+            v-if="pageInput[set_id]"
+            @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
+            :disabled="saving[set_id]"
+            class="bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold px-3 py-1.5 rounded-lg text-sm transition-colors"
           >
             Save
           </button>

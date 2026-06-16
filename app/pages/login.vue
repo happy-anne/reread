@@ -15,7 +15,10 @@ async function login() {
     password: password.value,
   });
   if (err) error.value = err.message;
-  else navigateTo("/dashboard");
+  else {
+    markLoginNow();
+    navigateTo("/dashboard");
+  }
   loading.value = false;
 }
 </script>

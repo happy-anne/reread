@@ -17,7 +17,7 @@ const offset = computed(() => {
 <template>
   <div class="relative inline-flex items-center justify-center" :style="{ width: size + 'px', height: size + 'px' }">
     <svg viewBox="0 0 120 120" :width="size" :height="size" class="-rotate-90">
-      <circle cx="60" cy="60" :r="radius" fill="none" stroke-width="10" class="text-slate-800" stroke="currentColor" />
+      <circle cx="60" cy="60" :r="radius" fill="none" stroke-width="10" stroke="white" opacity="0.15" />
       <circle
         cx="60"
         cy="60"

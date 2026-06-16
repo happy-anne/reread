@@ -3,6 +3,7 @@ definePageMeta({ layout: "auth" });
 // Supabase redirects here after email confirmation
 // @nuxtjs/supabase handles the token exchange automatically
 onMounted(() => {
+  markLoginNow();
   navigateTo("/dashboard");
 });
 </script>
