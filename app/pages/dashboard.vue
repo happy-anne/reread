@@ -181,14 +181,15 @@ onMounted(fetchData);
         </div>
 
         <!-- Direct input -->
-        <div class="flex gap-2 items-center">
+        <div class="flex gap-2 items-center justify-center">
+          <span class="text-sm text-slate-500">or type page</span>
           <input
             v-model.number="pageInput[set_id]"
             type="number"
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
-            :placeholder="`or type page (e.g. ${schedule.end_page + 10})`"
-            class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500"
+            placeholder="0"
+            class="w-16 text-center bg-slate-800 border border-slate-700 rounded-xl px-2 py-2 text-sm outline-none focus:border-emerald-500"
           />
           <button
             @click="pageInput[set_id] && saveProgress(set_id, schedule, pageInput[set_id]!)"
