@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-05-15",
   devtools: { enabled: true },
 
-  modules: ["@nuxtjs/supabase"],
+  modules: ["@nuxtjs/supabase", "@vite-pwa/nuxt"],
 
   vite: {
     plugins: [tailwindcss()],
@@ -29,7 +29,38 @@ export default defineNuxtConfig({
         { name: "description", content: "Read again. With a plan." },
         { name: "theme-color", content: "#0f172a" },
       ],
-      link: [{ rel: "manifest", href: "/manifest.json" }],
+      link: [{ rel: "icon", type: "image/png", href: "/favicon.png" }],
+    },
+  },
+
+  pwa: {
+    registerType: "autoUpdate",
+    manifest: {
+      name: "re:read",
+      short_name: "re:read",
+      description: "Read again. With a plan.",
+      start_url: "/",
+      display: "standalone",
+      background_color: "#0f172a",
+      theme_color: "#0f172a",
+      orientation: "portrait",
+      icons: [
+        { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+        { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+        { src: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
+    },
+    workbox: {
+      navigateFallback: "/",
+      globPatterns: ["**/*.{js,css,html,png,svg,ico}"],
+    },
+    client: {
+      installPrompt: true,
+    },
+    devOptions: {
+      enabled: true,
+      type: "module",
     },
   },
 

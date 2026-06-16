@@ -39,6 +39,7 @@ export interface ReadingLog {
   log_date: string; // YYYY-MM-DD
   target_start_page: number;
   target_end_page: number;
+  book_occurrence: number; // which book occurrence in the set's full reread sequence
   actual_page: number | null; // last page actually read
   status: "completed" | "partial" | "not_done" | "passed";
   created_at: string;

@@ -10,8 +10,8 @@ function toLocalDateStr(d: Date): string {
 
 /** Parse a YYYY-MM-DD string as a local midnight Date */
 function parseLocalDate(str: string): Date {
-  const [y, m, d] = str.split("-").map(Number);
-  return new Date(y, m - 1, d);
+  const parts = str.split("-").map(Number);
+  return new Date(parts[0]!, parts[1]! - 1, parts[2]!);
 }
 
 /**
@@ -64,171 +64,104 @@ export function calcTotalPages(items: ReadingSetItem[], rereadCount: number): nu
 }
 
 /**
- * Builds a day-by-day schedule.
- * One book at a time: when a book finishes mid-day budget, the remaining
- * budget carries over to the next book on the SAME day.
+ * Computes the live (auto-redistributed) schedule starting from `today`,
+ * based on the user's actual last-read position (from past logs) rather
+ * than the static original plan. This is the core "자동 재분배" feature:
+ * remaining pages are spread evenly across remaining reading days.
+ *
+ * - If a log exists for `today`, its target range is returned unchanged
+ *   (already committed for today).
+ * - Otherwise, position = last log with actual_page set (most recent date
+ *   before today), or the very start of the sequence if no logs exist.
+ * - Remaining pages (from position+1 to the end of all reread rounds) are
+ *   divided across reading days from today through end_date.
  */
-export function buildSchedule(
-  set: ReadingSet & { items: ReadingSetItem[] },
-  readingDates: string[]
-): DailySchedule[] {
-  const totalPages = calcTotalPages(set.items, set.reread_count);
-  if (readingDates.length === 0 || totalPages === 0) return [];
+export function computeLiveSchedule(
+  set: ReadingSet,
+  items: ReadingSetItem[],
+  today: string,
+  pastLogs: { log_date: string; book_occurrence: number; actual_page: number | null; status: string }[]
+): DailySchedule | null {
+  const sequence = buildBookSequence(items, set.reread_count);
+  if (sequence.length === 0) return null;
 
-  const pagesPerDay = Math.ceil(totalPages / readingDates.length);
-  const sequence = buildBookSequence(set.items, set.reread_count);
+  // Find the most recent log strictly before today with an actual page recorded
+  const priorLogs = pastLogs
+    .filter((l) => l.log_date < today && l.actual_page != null)
+    .sort((a, b) => (a.log_date < b.log_date ? 1 : -1));
+  const lastLog = priorLogs[0];
 
-  const schedule: DailySchedule[] = [];
-  let seqIdx = 0;
-  let currentPage = sequence[0]?.book.start_page ?? 1;
-
-  for (const date of readingDates) {
-    if (seqIdx >= sequence.length) break;
-
-    let budgetLeft = pagesPerDay;
-
-    // A single day may cover multiple books if one finishes quickly
-    while (budgetLeft > 0 && seqIdx < sequence.length) {
-      const { book, round, occurrence } = sequence[seqIdx];
-      const bookLastPage = book.total_pages;
-      const remainingInBook = bookLastPage - currentPage + 1;
-      const todayPages = Math.min(budgetLeft, remainingInBook);
-      const endPage = currentPage + todayPages - 1;
-
-      // Only push if this is the first segment for this date, else extend or combine
-      // For simplicity: one schedule entry per day (primary book of the day)
-      const existing = schedule.find((s) => s.date === date);
-      if (existing) {
-        // Same day, different book — just record as the main block
-        // In practice with small pagesPerDay this rarely happens
-      } else {
-        schedule.push({
-          date,
-          book_id: book.id,
-          book_title: book.title,
-          start_page: currentPage,
-          end_page: endPage,
-          pages_count: todayPages,
-          reread_round: round,
-          book_occurrence: occurrence,
-        });
-      }
-
-      budgetLeft -= todayPages;
-
-      if (endPage >= bookLastPage) {
-        seqIdx++;
-        currentPage = sequence[seqIdx]?.book.start_page ?? 1;
-        // Remaining budget rolls into the next book on the same day
-      } else {
-        currentPage = endPage + 1;
-        break;
-      }
-    }
+  let occurrence = 0;
+  let lastPage = sequence[0]!.book.start_page - 1;
+  if (lastLog) {
+    occurrence = lastLog.book_occurrence;
+    lastPage = lastLog.actual_page!;
   }
 
-  return schedule;
-}
-
-/**
- * Recalculates remaining schedule from tomorrow onward based on actual page read today.
- * Today's entry is kept as-is (already logged). Future entries are redistributed.
- */
-export function redistributeSchedule(
-  fullSchedule: DailySchedule[],
-  today: string,
-  actualPageRead: number | null,
-  restDays: number[],
-  endDate: string,
-  allItems: ReadingSetItem[],
-  rereadCount: number
-): DailySchedule[] {
-  const todayEntry = fullSchedule.find((s) => s.date === today);
-  if (!todayEntry) return fullSchedule;
-
-  const pastAndToday = fullSchedule.filter((s) => s.date <= today);
-  const futureDates = getReadingDates(getNextDate(today), endDate, restDays);
-  if (futureDates.length === 0) return pastAndToday;
-
-  // Determine where we are in the book sequence
-  const sequence = buildBookSequence(allItems, rereadCount);
-  const currentOcc = todayEntry.book_occurrence;
-
-  // Find last page read in the current book occurrence
-  const effectiveLastPage = actualPageRead ?? todayEntry.start_page - 1;
-
-  // Build remaining page segments from current position onward
+  // Build remaining segments from current position onward
   const segments: { book: Book; round: number; occurrence: number; startPage: number }[] = [];
-
-  for (let i = 0; i < sequence.length; i++) {
-    const item = sequence[i];
-    if (item.occurrence < currentOcc) continue;
-    if (item.occurrence === currentOcc) {
-      const nextPage = effectiveLastPage + 1;
+  for (const item of sequence) {
+    if (item.occurrence < occurrence) continue;
+    if (item.occurrence === occurrence) {
+      const nextPage = lastPage + 1;
       if (nextPage <= item.book.total_pages) {
         segments.push({ ...item, startPage: nextPage });
       }
-      // else this book is done, move on
     } else {
       segments.push({ ...item, startPage: item.book.start_page });
     }
   }
 
-  // Calculate total remaining pages
-  const totalRemaining = segments.reduce((sum, seg) => {
-    return sum + (seg.book.total_pages - seg.startPage + 1);
-  }, 0);
+  if (segments.length === 0) return null; // entire plan finished
 
-  if (totalRemaining <= 0) return pastAndToday;
+  const totalRemaining = segments.reduce(
+    (sum, seg) => sum + (seg.book.total_pages - seg.startPage + 1),
+    0
+  );
 
-  const newPagesPerDay = Math.ceil(totalRemaining / futureDates.length);
+  const remainingDates = getReadingDates(today, set.end_date, set.rest_days ?? []);
+  if (remainingDates.length === 0) return null;
 
-  // Build new schedule for future dates
-  const newFutureSchedule: DailySchedule[] = [];
+  const pagesPerDay = Math.ceil(totalRemaining / remainingDates.length);
+
+  let currentPage = segments[0]!.startPage;
   let segIdx = 0;
-  let currentPage = segments[0]?.startPage ?? 1;
+  let budgetLeft = pagesPerDay;
+  let result: DailySchedule | null = null;
 
-  for (const date of futureDates) {
-    if (segIdx >= segments.length) break;
+  while (budgetLeft > 0 && segIdx < segments.length) {
+    const seg = segments[segIdx]!;
+    const remainingInBook = seg.book.total_pages - currentPage + 1;
+    const todayPages = Math.min(budgetLeft, remainingInBook);
+    const endPage = currentPage + todayPages - 1;
 
-    let budgetLeft = newPagesPerDay;
+    if (!result) {
+      result = {
+        date: today,
+        book_id: seg.book.id,
+        book_title: seg.book.title,
+        start_page: currentPage,
+        end_page: endPage,
+        pages_count: todayPages,
+        reread_round: seg.round,
+        book_occurrence: seg.occurrence,
+      };
+    } else {
+      // Today's budget spans into a second book — extend the visible range
+      result.end_page = endPage;
+      result.pages_count += todayPages;
+    }
 
-    while (budgetLeft > 0 && segIdx < segments.length) {
-      const seg = segments[segIdx];
-      const remainingInBook = seg.book.total_pages - currentPage + 1;
-      const todayPages = Math.min(budgetLeft, remainingInBook);
-      const endPage = currentPage + todayPages - 1;
+    budgetLeft -= todayPages;
 
-      if (!newFutureSchedule.find((s) => s.date === date)) {
-        newFutureSchedule.push({
-          date,
-          book_id: seg.book.id,
-          book_title: seg.book.title,
-          start_page: currentPage,
-          end_page: endPage,
-          pages_count: todayPages,
-          reread_round: seg.round,
-          book_occurrence: seg.occurrence,
-        });
-      }
-
-      budgetLeft -= todayPages;
-
-      if (endPage >= seg.book.total_pages) {
-        segIdx++;
-        currentPage = segments[segIdx]?.startPage ?? 1;
-      } else {
-        currentPage = endPage + 1;
-        break;
-      }
+    if (endPage >= seg.book.total_pages) {
+      segIdx++;
+      currentPage = segments[segIdx]?.startPage ?? 1;
+    } else {
+      currentPage = endPage + 1;
+      break;
     }
   }
 
-  return [...pastAndToday, ...newFutureSchedule];
-}
-
-function getNextDate(dateStr: string): string {
-  const d = parseLocalDate(dateStr);
-  d.setDate(d.getDate() + 1);
-  return toLocalDateStr(d);
+  return result;
 }

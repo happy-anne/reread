@@ -85,6 +85,7 @@ create table if not exists reading_logs (
   log_date date not null,
   target_start_page integer not null,
   target_end_page integer not null,
+  book_occurrence integer not null default 0, -- position in the set's full reread sequence
   actual_page integer, -- last page actually read (null = not recorded / passed)
   status text not null default 'not_done'
     check (status in ('completed', 'partial', 'not_done', 'passed')),
@@ -92,6 +93,8 @@ create table if not exists reading_logs (
   updated_at timestamptz not null default now(),
   unique (user_id, set_id, log_date)
 );
+
+alter table reading_logs add column if not exists book_occurrence integer not null default 0;
 
 alter table reading_logs enable row level security;
 create policy "Users manage their own logs" on reading_logs
@@ -105,9 +108,12 @@ create table if not exists user_settings (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade unique,
   notification_time time, -- e.g. '21:00:00'
+  rest_days integer[] not null default '{}', -- default rest days, pre-fills new sets
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table user_settings add column if not exists rest_days integer[] not null default '{}';
 
 alter table user_settings enable row level security;
 create policy "Users manage their own settings" on user_settings

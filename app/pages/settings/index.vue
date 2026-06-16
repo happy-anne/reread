@@ -3,8 +3,10 @@ const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
 const notificationTime = ref("21:00");
+const restDays = ref<number[]>([]);
 const saving = ref(false);
 const savedMsg = ref(false);
+const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 async function fetchSettings() {
   if (!user.value) return;
@@ -15,7 +17,14 @@ async function fetchSettings() {
     .single();
   if (data) {
     notificationTime.value = data.notification_time ?? "21:00";
+    restDays.value = data.rest_days ?? [];
   }
+}
+
+function toggleRestDay(day: number) {
+  const idx = restDays.value.indexOf(day);
+  if (idx >= 0) restDays.value.splice(idx, 1);
+  else restDays.value.push(day);
 }
 
 async function saveSettings() {
@@ -24,6 +33,7 @@ async function saveSettings() {
   await supabase.from("user_settings").upsert({
     user_id: user.value.id,
     notification_time: notificationTime.value,
+    rest_days: restDays.value,
     updated_at: new Date().toISOString(),
   }, { onConflict: "user_id" });
   saving.value = false;
@@ -55,14 +65,37 @@ onMounted(fetchSettings);
             class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500"
           />
         </div>
-        <button
-          @click="saveSettings"
-          :disabled="saving"
-          class="mt-3 w-full bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition-colors"
-        >
-          {{ saving ? "Saving..." : savedMsg ? "Saved!" : "Save" }}
-        </button>
       </div>
+
+      <!-- Rest days (default) -->
+      <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
+        <h2 class="font-semibold mb-1">Default rest days</h2>
+        <p class="text-slate-400 text-xs mb-3">Pre-fills new reading sets. Each set can still override this.</p>
+        <div class="flex gap-2">
+          <button
+            v-for="(label, idx) in DAY_LABELS"
+            :key="idx"
+            type="button"
+            @click="toggleRestDay(idx)"
+            class="flex-1 py-2 rounded-lg text-xs font-medium transition-colors"
+            :class="
+              restDays.includes(idx)
+                ? 'bg-slate-600 text-slate-300'
+                : 'bg-slate-700 border border-slate-600 text-slate-400 hover:border-slate-500'
+            "
+          >
+            {{ label }}
+          </button>
+        </div>
+      </div>
+
+      <button
+        @click="saveSettings"
+        :disabled="saving"
+        class="w-full bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+      >
+        {{ saving ? "Saving..." : savedMsg ? "Saved!" : "Save Settings" }}
+      </button>
 
       <!-- Account -->
       <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">

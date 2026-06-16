@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ReadingSet, ReadingSetItem, ReadingLog, DailySchedule } from "~/types";
-import { buildSchedule, getReadingDates } from "~/composables/useScheduler";
+import { computeLiveSchedule } from "~/composables/useScheduler";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -15,7 +15,7 @@ function range(start: number, end: number): number[] {
 const today = toLocalDateStr(new Date());
 const loading = ref(true);
 const activeSets = ref<(ReadingSet & { items: ReadingSetItem[] })[]>([]);
-const todayLogs = ref<ReadingLog[]>([]);
+const allLogs = ref<ReadingLog[]>([]);
 const todaySchedules = ref<{ set_id: string; schedule: DailySchedule }[]>([]);
 
 const pageInput = ref<Record<string, number | null>>({});
@@ -34,30 +34,51 @@ async function fetchData() {
 
   activeSets.value = (sets as any[]) ?? [];
 
-  // Build today's schedule for each active set
+  // Fetch all logs for these sets (needed to determine actual current position)
+  const setIds = activeSets.value.map((s) => s.id);
+  if (setIds.length > 0) {
+    const { data: logs } = await supabase
+      .from("reading_logs")
+      .select("*")
+      .eq("user_id", user.value!.id)
+      .in("set_id", setIds);
+    allLogs.value = (logs as ReadingLog[]) ?? [];
+  } else {
+    allLogs.value = [];
+  }
+
+  // Compute today's live (auto-redistributed) schedule per set
   todaySchedules.value = [];
   for (const set of activeSets.value) {
-    const dates = getReadingDates(set.start_date, set.end_date, set.rest_days ?? []);
-    const schedule = buildSchedule(set, dates);
-    const todayEntry = schedule.find((s) => s.date === today);
-    if (todayEntry) {
-      todaySchedules.value.push({ set_id: set.id, schedule: todayEntry });
+    const setLogs = allLogs.value.filter((l) => l.set_id === set.id);
+    const liveSchedule = computeLiveSchedule(set, set.items, today, setLogs);
+
+    // If today was already logged, show the exact persisted target range
+    const todayLog = setLogs.find((l) => l.log_date === today);
+    const schedule: DailySchedule | null = todayLog
+      ? {
+          date: today,
+          book_id: todayLog.book_id,
+          book_title:
+            set.items.find((i) => i.book_id === todayLog.book_id)?.book?.title ?? liveSchedule?.book_title ?? "",
+          start_page: todayLog.target_start_page,
+          end_page: todayLog.target_end_page,
+          pages_count: todayLog.target_end_page - todayLog.target_start_page + 1,
+          reread_round: liveSchedule?.reread_round ?? 1,
+          book_occurrence: todayLog.book_occurrence,
+        }
+      : liveSchedule;
+
+    if (schedule) {
+      todaySchedules.value.push({ set_id: set.id, schedule });
     }
   }
 
-  // Fetch today's logs
-  const { data: logs } = await supabase
-    .from("reading_logs")
-    .select("*")
-    .eq("user_id", user.value!.id)
-    .eq("log_date", today);
-
-  todayLogs.value = (logs as ReadingLog[]) ?? [];
   loading.value = false;
 }
 
 function getLog(setId: string) {
-  return todayLogs.value.find((l) => l.set_id === setId);
+  return allLogs.value.find((l) => l.set_id === setId && l.log_date === today);
 }
 
 function getStatus(setId: string) {
@@ -83,6 +104,7 @@ async function saveProgress(setId: string, schedule: DailySchedule, actual: numb
     log_date: today,
     target_start_page: schedule.start_page,
     target_end_page: schedule.end_page,
+    book_occurrence: schedule.book_occurrence,
     actual_page: actual,
     status,
   };
@@ -109,6 +131,7 @@ async function markPassed(setId: string, schedule: DailySchedule) {
     log_date: today,
     target_start_page: schedule.start_page,
     target_end_page: schedule.end_page,
+    book_occurrence: schedule.book_occurrence,
     actual_page: null,
     status: "passed" as const,
   };

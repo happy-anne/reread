@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import type { Book, ReadingSetItem } from "~/types";
+import { getReadingDates } from "~/composables/useScheduler";
 // @ts-ignore - vuedraggable types
 import draggable from "vuedraggable";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
+
+function toLocalDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 const books = ref<Book[]>([]);
 const saving = ref(false);
@@ -12,7 +17,7 @@ const saving = ref(false);
 const form = reactive({
   name: "",
   reread_count: 2,
-  start_date: new Date().toISOString().slice(0, 10),
+  start_date: toLocalDateStr(new Date()),
   end_date: "",
   rest_days: [] as number[],
 });
@@ -30,6 +35,16 @@ async function fetchBooks() {
     .eq("user_id", user.value.id)
     .order("title");
   books.value = (data as Book[]) ?? [];
+}
+
+async function fetchDefaultRestDays() {
+  if (!user.value) return;
+  const { data } = await supabase
+    .from("user_settings")
+    .select("rest_days")
+    .eq("user_id", user.value.id)
+    .single();
+  if (data?.rest_days) form.rest_days = [...data.rest_days];
 }
 
 function isSelected(bookId: string) {
@@ -59,14 +74,7 @@ const totalPages = computed(() => {
 
 const readingDays = computed(() => {
   if (!form.start_date || !form.end_date) return 0;
-  let count = 0;
-  const cur = new Date(form.start_date);
-  const end = new Date(form.end_date);
-  while (cur <= end) {
-    if (!form.rest_days.includes(cur.getDay())) count++;
-    cur.setDate(cur.getDate() + 1);
-  }
-  return count;
+  return getReadingDates(form.start_date, form.end_date, form.rest_days).length;
 });
 
 const dailyPages = computed(() =>
@@ -106,7 +114,10 @@ async function save() {
   navigateTo("/sets");
 }
 
-onMounted(fetchBooks);
+onMounted(() => {
+  fetchBooks();
+  fetchDefaultRestDays();
+});
 </script>
 
 <template>

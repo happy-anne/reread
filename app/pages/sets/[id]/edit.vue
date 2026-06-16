@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Book, ReadingSet, ReadingSetItem } from "~/types";
+import { getReadingDates } from "~/composables/useScheduler";
 // @ts-ignore
 import draggable from "vuedraggable";
 
@@ -78,14 +79,7 @@ const totalPages = computed(() => {
 
 const readingDays = computed(() => {
   if (!form.start_date || !form.end_date) return 0;
-  let count = 0;
-  const cur = new Date(form.start_date);
-  const end = new Date(form.end_date);
-  while (cur <= end) {
-    if (!form.rest_days.includes(cur.getDay())) count++;
-    cur.setDate(cur.getDate() + 1);
-  }
-  return count;
+  return getReadingDates(form.start_date, form.end_date, form.rest_days).length;
 });
 
 const dailyPages = computed(() =>
