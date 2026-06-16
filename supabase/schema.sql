@@ -1,6 +1,7 @@
 -- =============================================
 -- re:read — Supabase Schema
 -- Run this in the Supabase SQL editor
+-- Safe to re-run: all statements are idempotent.
 -- =============================================
 
 -- Enable UUID extension
@@ -21,6 +22,7 @@ create table if not exists books (
 );
 
 alter table books enable row level security;
+drop policy if exists "Users manage their own books" on books;
 create policy "Users manage their own books" on books
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
@@ -41,6 +43,7 @@ create table if not exists reading_sets (
 );
 
 alter table reading_sets enable row level security;
+drop policy if exists "Users manage their own sets" on reading_sets;
 create policy "Users manage their own sets" on reading_sets
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
@@ -58,6 +61,7 @@ create table if not exists reading_set_items (
 );
 
 alter table reading_set_items enable row level security;
+drop policy if exists "Users access items of their sets" on reading_set_items;
 create policy "Users access items of their sets" on reading_set_items
   using (
     exists (
@@ -97,6 +101,7 @@ create table if not exists reading_logs (
 alter table reading_logs add column if not exists book_occurrence integer not null default 0;
 
 alter table reading_logs enable row level security;
+drop policy if exists "Users manage their own logs" on reading_logs;
 create policy "Users manage their own logs" on reading_logs
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
@@ -116,6 +121,7 @@ create table if not exists user_settings (
 alter table user_settings add column if not exists rest_days integer[] not null default '{}';
 
 alter table user_settings enable row level security;
+drop policy if exists "Users manage their own settings" on user_settings;
 create policy "Users manage their own settings" on user_settings
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
@@ -131,20 +137,27 @@ begin
 end;
 $$;
 
+drop trigger if exists books_updated_at on books;
 create trigger books_updated_at before update on books
   for each row execute function update_updated_at();
+
+drop trigger if exists reading_sets_updated_at on reading_sets;
 create trigger reading_sets_updated_at before update on reading_sets
   for each row execute function update_updated_at();
+
+drop trigger if exists reading_logs_updated_at on reading_logs;
 create trigger reading_logs_updated_at before update on reading_logs
   for each row execute function update_updated_at();
+
+drop trigger if exists user_settings_updated_at on user_settings;
 create trigger user_settings_updated_at before update on user_settings
   for each row execute function update_updated_at();
 
 -- -------------------------
 -- Indexes
 -- -------------------------
-create index on books (user_id);
-create index on reading_sets (user_id);
-create index on reading_set_items (set_id);
-create index on reading_logs (user_id, log_date);
-create index on reading_logs (set_id, log_date);
+create index if not exists books_user_id_idx on books (user_id);
+create index if not exists reading_sets_user_id_idx on reading_sets (user_id);
+create index if not exists reading_set_items_set_id_idx on reading_set_items (set_id);
+create index if not exists reading_logs_user_id_log_date_idx on reading_logs (user_id, log_date);
+create index if not exists reading_logs_set_id_log_date_idx on reading_logs (set_id, log_date);
