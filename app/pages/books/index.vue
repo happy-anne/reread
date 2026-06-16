@@ -48,7 +48,6 @@ async function saveBook() {
     title: form.title,
     total_pages: total,
     start_page: start,
-    readable_pages: readable,
     user_id: user.value.id,
   };
 
