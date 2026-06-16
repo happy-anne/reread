@@ -5,7 +5,14 @@ import { buildSchedule, getReadingDates } from "~/composables/useScheduler";
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
-const today = new Date().toISOString().slice(0, 10);
+function toLocalDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function range(start: number, end: number): number[] {
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+const today = toLocalDateStr(new Date());
 const loading = ref(true);
 const activeSets = ref<(ReadingSet & { items: ReadingSetItem[] })[]>([]);
 const todayLogs = ref<ReadingLog[]>([]);
@@ -226,8 +233,3 @@ onMounted(fetchData);
   </div>
 </template>
 
-<script lang="ts">
-function range(start: number, end: number): number[] {
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-}
-</script>

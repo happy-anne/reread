@@ -5,7 +5,10 @@ const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
 const logs = ref<ReadingLog[]>([]);
-const currentMonth = ref(new Date().toISOString().slice(0, 7)); // YYYY-MM
+const now = new Date();
+const currentMonth = ref(
+  `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+);
 
 const statusEmoji: Record<string, string> = {
   completed: "🟢",
