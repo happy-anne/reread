@@ -12,29 +12,29 @@ const config = {
     message: "오늘은 어떤 페이지를 만나게 될까요?",
   },
   completed: {
-    ring: "stroke-emerald-400",
-    glow: "bg-emerald-400/15",
-    fg: "text-emerald-400",
+    ring: "stroke-emerald-500",
+    glow: "bg-emerald-100",
+    fg: "text-emerald-600",
     label: "Completed",
     message: "대단해요! 오늘도 스스로와의 약속을 지켜냈어요.",
   },
   partial: {
     ring: "stroke-yellow-400",
-    glow: "bg-yellow-400/15",
+    glow: "bg-yellow-100",
     fg: "text-yellow-400",
     label: "Partial",
     message: "천천히 가도 괜찮아요. 오늘도 앞으로 나아갔어요.",
   },
   not_done: {
     ring: "stroke-slate-600",
-    glow: "bg-slate-600/10",
-    fg: "text-slate-500",
+    glow: "bg-gray-200/10",
+    fg: "text-gray-400",
     label: "Not started",
     message: "괜찮아요. 내일 다시 펼치면 그걸로 충분해요.",
   },
   passed: {
     ring: "stroke-sky-400",
-    glow: "bg-sky-400/15",
+    glow: "bg-sky-100",
     fg: "text-sky-400",
     label: "Passed",
     message: "쉬어가는 하루도 독서 여정의 일부예요.",
@@ -48,7 +48,7 @@ const config = {
       <div class="absolute inset-0 rounded-full blur-xl" :class="config.glow" />
 
       <svg viewBox="0 0 100 100" class="w-24 h-24 relative">
-        <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="4" class="text-slate-800" />
+        <circle cx="50" cy="50" r="44" fill="none" stroke="#e5e7eb" stroke-width="4" />
 
         <!-- Pending: open book with question mark -->
         <g v-if="status === 'pending'">
@@ -63,9 +63,9 @@ const config = {
         <g v-else-if="status === 'completed'">
           <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="4" />
           <path d="M32 42 Q50 34 50 42 Q50 34 68 42 L68 64 Q50 56 50 64 Q50 56 32 64 Z"
-                fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-300" stroke-linejoin="round" />
+                fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600" stroke-linejoin="round" />
           <path d="M40 50 L48 58 L62 44" fill="none" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400" />
+                stroke-linecap="round" stroke-linejoin="round" class="text-emerald-600" />
         </g>
 
         <!-- Partial: half-filled book -->
@@ -80,8 +80,8 @@ const config = {
         <!-- Not done: empty/closed book -->
         <g v-else-if="status === 'not_done'">
           <rect x="36" y="36" width="28" height="28" rx="3" fill="none" stroke="currentColor"
-                stroke-width="2.5" class="text-slate-600" />
-          <line x1="50" y1="36" x2="50" y2="64" stroke="currentColor" stroke-width="2" class="text-slate-600" />
+                stroke-width="2.5" class="text-gray-300" />
+          <line x1="50" y1="36" x2="50" y2="64" stroke="currentColor" stroke-width="2" class="text-gray-300" />
         </g>
 
         <!-- Passed: forward/skip arrow -->
@@ -95,6 +95,6 @@ const config = {
       </svg>
     </div>
     <p class="text-sm font-medium mt-2" :class="config.fg">{{ config.label }}</p>
-    <p class="text-xs text-slate-400 mt-1 text-center px-4 leading-relaxed">{{ config.message }}</p>
+    <p class="text-xs text-gray-500 mt-1 text-center px-4 leading-relaxed">{{ config.message }}</p>
   </div>
 </template>

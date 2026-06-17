@@ -44,6 +44,7 @@ create table if not exists reading_sets (
 );
 
 alter table reading_sets add column if not exists is_active boolean not null default true;
+alter table reading_sets add column if not exists color text not null default 'emerald';
 
 alter table reading_sets enable row level security;
 drop policy if exists "Users manage their own sets" on reading_sets;

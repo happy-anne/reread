@@ -2,6 +2,7 @@
 import type { ReadingLog, ReadingSet, ReadingSetItem } from "~/types";
 import { calcTotalPages } from "~/composables/useScheduler";
 import { PencilIcon } from "@heroicons/vue/24/outline";
+import { getSetColor } from "~/composables/useSetColor";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -165,10 +166,10 @@ onMounted(fetchAll);
     <h1 class="text-2xl font-bold mb-6">Stats</h1>
 
     <!-- Set selector (분리된 상단 카드) -->
-    <div v-if="selectableSets.length > 0" class="bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-4">
+    <div v-if="selectableSets.length > 0" class="bg-white rounded-2xl p-4 border border-gray-200 mb-4">
       <select
         v-model="selectedSetId"
-        class="w-full bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500"
+        class="w-full bg-gray-100 border border-gray-300 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500"
       >
         <option v-for="set in selectableSets" :key="set.id" :value="set.id">
           {{ set.name }}{{ set.is_active ? "" : " (일시중지)" }}
@@ -177,21 +178,25 @@ onMounted(fetchAll);
     </div>
 
     <!-- Set progress -->
-    <div v-if="selectedSetProgress" class="bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-4">
+    <div v-if="selectedSetProgress" class="bg-white rounded-2xl p-4 border border-gray-200 mb-4">
       <div class="flex items-center gap-5">
         <DonutProgress :percent="selectedSetProgress.percent" :size="100" />
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-2">
-            <p class="font-semibold truncate">{{ selectedSetProgress.name }}</p>
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                :class="getSetColor(sets.find(s=>s.id===selectedSetId)?.color??'').dot" />
+              <p class="font-semibold truncate">{{ selectedSetProgress.name }}</p>
+            </div>
             <NuxtLink
               :to="`/sets/${selectedSetId}/edit`"
-              class="flex-shrink-0 p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-white transition-colors"
+              class="flex-shrink-0 p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors"
               title="편집"
             >
               <PencilIcon class="w-4 h-4" />
             </NuxtLink>
           </div>
-          <p class="text-emerald-400 text-sm mt-1">
+          <p class="text-emerald-600 text-sm mt-1">
             {{ selectedSetProgress.pagesRead.toLocaleString() }} / {{ selectedSetProgress.totalPages.toLocaleString() }}쪽
           </p>
         </div>
@@ -200,36 +205,36 @@ onMounted(fetchAll);
 
     <!-- Stats cards (가로 한 줄) -->
     <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
-      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-emerald-400">{{ stats.streak }}</p>
-        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">연속<br/>일수</p>
+      <div class="bg-white rounded-2xl p-3 border border-gray-200 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-600">{{ stats.streak }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">연속 일수</p>
       </div>
-      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-emerald-400">{{ stats.totalPages.toLocaleString() }}</p>
-        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">총 읽은<br/>쪽수</p>
+      <div class="bg-white rounded-2xl p-3 border border-gray-200 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-600">{{ stats.totalPages.toLocaleString() }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">총 읽은 쪽</p>
       </div>
-      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-emerald-400">
+      <div class="bg-white rounded-2xl p-3 border border-gray-200 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-600">
           {{ stats.totalLogged > 0 ? Math.round((stats.completed / stats.totalLogged) * 100) : 0 }}%
         </p>
-        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">완료율</p>
+        <p class="text-xs text-gray-500 mt-0.5">완료율</p>
       </div>
-      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-emerald-400">{{ stats.completedSets }}</p>
-        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">끝난<br/>세트</p>
+      <div class="bg-white rounded-2xl p-3 border border-gray-200 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-600">{{ stats.completedSets }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">끝난 세트</p>
       </div>
     </div>
 
     <!-- Calendar -->
-    <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700">
+    <div class="bg-white rounded-2xl p-4 border border-gray-200">
       <div class="flex items-center justify-between mb-4">
-        <button @click="prevMonth" class="text-slate-400 hover:text-white px-2">‹</button>
+        <button @click="prevMonth" class="text-gray-500 hover:text-gray-900 px-2">‹</button>
         <h2 class="font-semibold">{{ monthDisplay }}</h2>
-        <button @click="nextMonth" class="text-slate-400 hover:text-white px-2">›</button>
+        <button @click="nextMonth" class="text-gray-500 hover:text-gray-900 px-2">›</button>
       </div>
 
       <div class="grid grid-cols-7 gap-1 mb-1">
-        <div v-for="d in ['일','월','화','수','목','금','토']" :key="d" class="text-center text-xs text-slate-500 py-1">
+        <div v-for="d in ['일','월','화','수','목','금','토']" :key="d" class="text-center text-xs text-gray-400 py-1">
           {{ d }}
         </div>
       </div>
@@ -239,10 +244,10 @@ onMounted(fetchAll);
           v-for="(day, i) in calendarDays"
           :key="i"
           class="aspect-square flex flex-col items-center justify-center rounded-lg text-xs"
-          :class="day.date ? 'bg-slate-700/50' : ''"
+          :class="day.date ? 'bg-gray-100' : ''"
         >
           <template v-if="day.date">
-            <span class="text-slate-400">{{ parseInt(day.date.slice(-2)) }}</span>
+            <span class="text-gray-500">{{ parseInt(day.date.slice(-2)) }}</span>
             <span v-if="day.log" class="text-xs leading-none mt-0.5">
               {{ statusEmoji[day.log.status] }}
             </span>
@@ -251,7 +256,7 @@ onMounted(fetchAll);
       </div>
 
       <!-- Legend -->
-      <div class="flex gap-3 mt-4 justify-center text-xs text-slate-500">
+      <div class="flex gap-3 mt-4 justify-center text-xs text-gray-400">
         <span>🟢 완료</span>
         <span>🟡 부분</span>
         <span>🔴 미완</span>

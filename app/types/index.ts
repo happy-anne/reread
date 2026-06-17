@@ -18,6 +18,7 @@ export interface ReadingSet {
   end_date: string;
   rest_days: number[]; // 0=Sun, 1=Mon, ..., 6=Sat
   is_active: boolean;
+  color: string;
   created_at: string;
   updated_at: string;
   // relations

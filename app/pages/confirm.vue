@@ -8,5 +8,5 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="text-center text-slate-400">Confirming your account...</div>
+  <div class="text-center text-gray-500">Confirming your account...</div>
 </template>

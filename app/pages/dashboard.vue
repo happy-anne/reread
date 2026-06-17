@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ReadingSet, ReadingSetItem, ReadingLog, DailySchedule } from "~/types";
 import { computeLiveSchedule } from "~/composables/useScheduler";
+import { getSetColor } from "~/composables/useSetColor";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -155,16 +156,16 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <!-- Brand header -->
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold text-emerald-400 tracking-tight">re:read</h1>
-      <p class="text-slate-500 text-xs mt-1">Read again. With a plan.</p>
+      <h1 class="text-4xl font-extrabold text-emerald-600 tracking-tight">re:read</h1>
+      <p class="text-gray-400 text-xs mt-1">Read again. With a plan.</p>
     </div>
 
-    <div v-if="loading" class="text-slate-500 text-sm text-center">불러오는 중...</div>
+    <div v-if="loading" class="text-gray-400 text-sm text-center">불러오는 중...</div>
 
-    <div v-else-if="todaySchedules.length === 0" class="text-center py-16 text-slate-500">
+    <div v-else-if="todaySchedules.length === 0" class="text-center py-16 text-gray-400">
       <p class="text-4xl mb-3">📚</p>
       <p>오늘 진행 중인 읽기 세트가 없어요.</p>
-      <NuxtLink to="/sets" class="text-emerald-400 text-sm mt-2 inline-block hover:underline">
+      <NuxtLink to="/sets" class="text-emerald-600 text-sm mt-2 inline-block hover:underline">
         읽기 세트 만들기 →
       </NuxtLink>
     </div>
@@ -173,10 +174,11 @@ onMounted(fetchData);
       <div
         v-for="{ set_id, schedule } in todaySchedules"
         :key="set_id"
-        class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6"
+        class="rounded-3xl p-5 sm:p-6 border"
+        :class="[getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').cardBg, getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').cardBorder]"
       >
         <!-- Set name + round (top of card) -->
-        <p class="text-center text-xs text-slate-500 font-medium mb-4">
+        <p class="text-center text-xs text-gray-400 font-medium mb-4">
           {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
         </p>
 
@@ -196,8 +198,8 @@ onMounted(fetchData);
             class="px-3 py-1.5 rounded-lg text-sm font-mono transition-colors"
             :class="
               getLog(set_id)?.actual_page === p
-                ? 'bg-emerald-500 text-slate-950 font-bold'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                ? 'bg-emerald-500 text-gray-900 font-bold'
+                : 'bg-white hover:bg-gray-100 text-gray-800'
             "
           >
             {{ p }}
@@ -209,13 +211,13 @@ onMounted(fetchData);
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
             placeholder="직접 입력"
-            class="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-emerald-500"
+            class="w-14 text-center bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
           <button
             v-if="pageInput[set_id]"
             @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
             :disabled="saving[set_id]"
-            class="bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold px-3 py-1.5 rounded-lg text-sm transition-colors"
+            class="bg-emerald-500 disabled:opacity-40 text-gray-900 font-semibold px-3 py-1.5 rounded-lg text-sm transition-colors"
           >
             저장
           </button>
@@ -225,7 +227,7 @@ onMounted(fetchData);
         <button
           @click="markPassed(set_id, schedule)"
           :disabled="saving[set_id]"
-          class="mt-3 w-full text-slate-500 hover:text-slate-300 text-sm py-1 transition-colors"
+          class="mt-3 w-full text-gray-400 hover:text-gray-600 text-sm py-1 transition-colors"
         >
           오늘 패스
         </button>

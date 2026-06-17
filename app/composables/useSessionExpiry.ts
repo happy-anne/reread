@@ -15,7 +15,12 @@ export function getLoginAt(): number | null {
 export function getDaysRemaining(): number | null {
   const loginAt = getLoginAt();
   if (!loginAt) return null;
-  const elapsedDays = Math.floor((Date.now() - loginAt) / 86400000);
+  // Compare calendar dates so D-day decrements on date change, not after 24h
+  const loginMidnight = new Date(loginAt);
+  loginMidnight.setHours(0, 0, 0, 0);
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+  const elapsedDays = Math.round((todayMidnight.getTime() - loginMidnight.getTime()) / 86400000);
   return SESSION_DAYS - elapsedDays;
 }
 

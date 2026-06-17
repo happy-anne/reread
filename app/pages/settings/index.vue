@@ -94,6 +94,13 @@ function backspacePinDigit() {
   target.value = target.value.slice(0, -1);
 }
 
+function onPinKeydown(e: KeyboardEvent) {
+  if (!showPinModal.value) return;
+  if (e.key >= "0" && e.key <= "9") pressPinDigit(e.key);
+  else if (e.key === "Backspace") backspacePinDigit();
+  else if (e.key === "Escape") showPinModal.value = false;
+}
+
 function disablePin() {
   if (!confirm("PIN 잠금을 해제할까요?")) return;
   removePin();
@@ -104,7 +111,9 @@ onMounted(() => {
   fetchSettings();
   daysRemaining.value = getDaysRemaining();
   pinSet.value = hasPin();
+  window.addEventListener("keydown", onPinKeydown);
 });
+onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 </script>
 
 <template>
@@ -113,22 +122,22 @@ onMounted(() => {
 
     <div class="space-y-4">
       <!-- Notification -->
-      <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
+      <div class="bg-white rounded-2xl p-5 border border-gray-200">
         <h2 class="font-semibold mb-3">알림</h2>
         <div>
-          <label class="text-sm text-slate-400 block mb-1">알림 시간</label>
+          <label class="text-sm text-gray-500 block mb-1">알림 시간</label>
           <input
             v-model="notificationTime"
             type="time"
-            class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500"
+            class="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500"
           />
         </div>
       </div>
 
       <!-- Rest days (default) -->
-      <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
+      <div class="bg-white rounded-2xl p-5 border border-gray-200">
         <h2 class="font-semibold mb-1">기본 쉬는 날</h2>
-        <p class="text-slate-400 text-xs mb-3">새 읽기 세트에 기본 적용돼요. 각 세트에서 변경할 수 있어요.</p>
+        <p class="text-gray-500 text-xs mb-3">새 읽기 세트에 기본 적용돼요. 각 세트에서 변경할 수 있어요.</p>
         <div class="flex gap-2">
           <button
             v-for="(label, idx) in DAY_LABELS"
@@ -138,8 +147,8 @@ onMounted(() => {
             class="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors border-2"
             :class="
               restDays.includes(idx)
-                ? 'bg-emerald-500 border-emerald-500 text-slate-950'
-                : 'bg-slate-700 border-slate-700 text-slate-400 hover:border-slate-500'
+                ? 'bg-emerald-500 border-emerald-500 text-gray-900'
+                : 'bg-gray-100 border-gray-200 text-gray-500 hover:border-gray-400'
             "
           >
             {{ label }}
@@ -150,34 +159,34 @@ onMounted(() => {
       <button
         @click="saveSettings"
         :disabled="saving"
-        class="w-full bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+        class="w-full bg-emerald-500 disabled:opacity-40 text-gray-900 font-semibold py-2.5 rounded-xl text-sm transition-colors"
       >
         {{ saving ? "저장 중..." : savedMsg ? "저장됨!" : "설정 저장" }}
       </button>
 
       <!-- Security -->
-      <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
+      <div class="bg-white rounded-2xl p-5 border border-gray-200">
         <h2 class="font-semibold mb-1">보안</h2>
-        <p class="text-slate-400 text-xs mb-4">
+        <p class="text-gray-500 text-xs mb-4">
           매번 로그인하지 않도록 4자리 PIN으로 앱을 빠르게 잠금 해제할 수 있어요.
         </p>
         <button
           v-if="!pinSet"
           @click="openPinModal"
-          class="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+          class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm transition-colors"
         >
           PIN 설정하기
         </button>
         <div v-else class="flex gap-2">
           <button
             @click="openPinModal"
-            class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 rounded-xl text-sm transition-colors"
           >
             PIN 변경
           </button>
           <button
             @click="disablePin"
-            class="flex-1 bg-slate-700 hover:bg-red-900/30 text-red-400 hover:text-red-300 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+            class="flex-1 bg-gray-100 hover:bg-red-50 text-red-500 hover:text-red-600 font-semibold py-2.5 rounded-xl text-sm transition-colors"
           >
             PIN 해제
           </button>
@@ -185,15 +194,15 @@ onMounted(() => {
       </div>
 
       <!-- Account -->
-      <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
+      <div class="bg-white rounded-2xl p-5 border border-gray-200">
         <h2 class="font-semibold mb-1">계정</h2>
-        <p class="text-slate-400 text-sm mb-1">{{ user?.email }}</p>
-        <p v-if="daysRemaining !== null" class="text-xs mb-4" :class="daysRemaining <= 5 ? 'text-yellow-400' : 'text-slate-500'">
+        <p class="text-gray-500 text-sm mb-1">{{ user?.email }}</p>
+        <p v-if="daysRemaining !== null" class="text-xs mb-4" :class="daysRemaining <= 5 ? 'text-yellow-500' : 'text-gray-400'">
           로그인 세션 D-{{ daysRemaining }}
         </p>
         <button
           @click="signOut"
-          class="w-full bg-slate-700 hover:bg-red-900/30 text-red-400 hover:text-red-300 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+          class="w-full bg-gray-100 hover:bg-red-50 text-red-500 hover:text-red-600 font-semibold py-2.5 rounded-xl text-sm transition-colors"
         >
           로그아웃
         </button>
@@ -202,10 +211,10 @@ onMounted(() => {
 
     <!-- PIN setup modal -->
     <Teleport to="body">
-      <div v-if="showPinModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-        <div class="bg-slate-800 rounded-2xl p-6 w-full max-w-sm border border-slate-700 text-center">
+      <div v-if="showPinModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm border border-gray-200 text-center shadow-xl">
           <h2 class="text-lg font-bold mb-1">{{ pinStep === "enter" ? "새 PIN 입력" : "PIN 확인" }}</h2>
-          <p class="text-slate-400 text-xs mb-5">4자리 숫자를 입력해주세요</p>
+          <p class="text-gray-500 text-xs mb-5">4자리 숫자를 입력해주세요</p>
 
           <div class="flex gap-3 justify-center mb-2">
             <div
@@ -214,32 +223,32 @@ onMounted(() => {
               class="w-4 h-4 rounded-full border-2"
               :class="
                 i <= (pinStep === 'enter' ? pinDraft.length : pinConfirmDraft.length)
-                  ? 'bg-emerald-400 border-emerald-400'
-                  : 'border-slate-600'
+                  ? 'bg-emerald-500 border-emerald-500'
+                  : 'border-gray-300'
               "
             />
           </div>
-          <p class="h-5 text-red-400 text-xs mb-4">{{ pinError }}</p>
+          <p class="h-5 text-red-500 text-xs mb-4">{{ pinError }}</p>
 
           <div class="grid grid-cols-3 gap-3 max-w-xs mx-auto">
             <button
               v-for="n in [1,2,3,4,5,6,7,8,9]"
               :key="n"
               @click="pressPinDigit(String(n))"
-              class="aspect-square rounded-full bg-slate-700 hover:bg-slate-600 text-lg font-semibold transition-colors"
+              class="aspect-square rounded-full bg-gray-100 hover:bg-gray-200 text-lg font-semibold transition-colors"
             >
               {{ n }}
             </button>
             <div />
             <button
               @click="pressPinDigit('0')"
-              class="aspect-square rounded-full bg-slate-700 hover:bg-slate-600 text-lg font-semibold transition-colors"
+              class="aspect-square rounded-full bg-gray-100 hover:bg-gray-200 text-lg font-semibold transition-colors"
             >
               0
             </button>
             <button
               @click="backspacePinDigit"
-              class="aspect-square rounded-full flex items-center justify-center text-slate-400 hover:text-slate-200 transition-colors"
+              class="aspect-square rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors"
             >
               ⌫
             </button>
@@ -247,7 +256,7 @@ onMounted(() => {
 
           <button
             @click="showPinModal = false"
-            class="mt-5 text-slate-500 hover:text-slate-300 text-sm"
+            class="mt-5 text-gray-400 hover:text-gray-600 text-sm"
           >
             취소
           </button>
