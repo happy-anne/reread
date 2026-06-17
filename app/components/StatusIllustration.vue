@@ -1,9 +1,16 @@
 <script setup lang="ts">
 const props = defineProps<{
-  status: "completed" | "partial" | "not_done" | "passed";
+  status: "completed" | "partial" | "not_done" | "passed" | "pending";
 }>();
 
 const config = {
+  pending: {
+    ring: "stroke-emerald-600",
+    glow: "bg-emerald-900/20",
+    fg: "text-emerald-600",
+    label: "오늘의 독서",
+    message: "오늘은 어떤 페이지를 만나게 될까요?",
+  },
   completed: {
     ring: "stroke-emerald-400",
     glow: "bg-emerald-400/15",
@@ -43,8 +50,17 @@ const config = {
       <svg viewBox="0 0 100 100" class="w-24 h-24 relative">
         <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="4" class="text-slate-800" />
 
+        <!-- Pending: open book with question mark -->
+        <g v-if="status === 'pending'">
+          <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="3" stroke-dasharray="8 4" />
+          <path d="M32 42 Q50 34 50 42 Q50 34 68 42 L68 64 Q50 56 50 64 Q50 56 32 64 Z"
+                fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-700" stroke-linejoin="round" />
+          <line x1="50" y1="42" x2="50" y2="64" stroke="currentColor" stroke-width="2.5" class="text-emerald-700" />
+          <text x="50" y="54" text-anchor="middle" font-size="14" font-weight="bold" class="fill-emerald-500">?</text>
+        </g>
+
         <!-- Completed: open book with checkmark -->
-        <g v-if="status === 'completed'">
+        <g v-else-if="status === 'completed'">
           <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="4" />
           <path d="M32 42 Q50 34 50 42 Q50 34 68 42 L68 64 Q50 56 50 64 Q50 56 32 64 Z"
                 fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-300" stroke-linejoin="round" />

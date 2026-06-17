@@ -17,7 +17,7 @@ async function login() {
   if (err) error.value = err.message;
   else {
     markLoginNow();
-    navigateTo("/dashboard");
+    navigateTo("/welcome");
   }
   loading.value = false;
 }
@@ -32,7 +32,7 @@ async function login() {
 
     <form @submit.prevent="login" class="space-y-4">
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Email</label>
+        <label class="block text-sm text-slate-400 mb-1">이메일</label>
         <input
           v-model="email"
           type="email"
@@ -42,7 +42,7 @@ async function login() {
         />
       </div>
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Password</label>
+        <label class="block text-sm text-slate-400 mb-1">비밀번호</label>
         <input
           v-model="password"
           type="password"
@@ -59,13 +59,13 @@ async function login() {
         :disabled="loading"
         class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold py-3 rounded-xl transition-colors"
       >
-        {{ loading ? "Signing in..." : "Sign in" }}
+        {{ loading ? "로그인 중..." : "로그인" }}
       </button>
     </form>
 
     <p class="text-center text-sm text-slate-500 mt-6">
-      Don't have an account?
-      <NuxtLink to="/signup" class="text-emerald-400 hover:underline">Sign up</NuxtLink>
+      계정이 없으신가요?
+      <NuxtLink to="/signup" class="text-emerald-400 hover:underline">회원가입</NuxtLink>
     </p>
   </div>
 </template>

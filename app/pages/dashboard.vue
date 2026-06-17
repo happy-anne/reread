@@ -84,7 +84,7 @@ function getLog(setId: string) {
 
 function getStatus(setId: string) {
   const log = getLog(setId);
-  if (!log) return "not_done";
+  if (!log) return "pending";
   return log.status;
 }
 
@@ -159,13 +159,13 @@ onMounted(fetchData);
       <p class="text-slate-500 text-xs mt-1">Read again. With a plan.</p>
     </div>
 
-    <div v-if="loading" class="text-slate-500 text-sm text-center">Loading...</div>
+    <div v-if="loading" class="text-slate-500 text-sm text-center">불러오는 중...</div>
 
     <div v-else-if="todaySchedules.length === 0" class="text-center py-16 text-slate-500">
       <p class="text-4xl mb-3">📚</p>
-      <p>No active reading sets for today.</p>
+      <p>오늘 진행 중인 읽기 세트가 없어요.</p>
       <NuxtLink to="/sets" class="text-emerald-400 text-sm mt-2 inline-block hover:underline">
-        Create a reading set →
+        읽기 세트 만들기 →
       </NuxtLink>
     </div>
 
@@ -208,7 +208,7 @@ onMounted(fetchData);
             type="number"
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
-            placeholder="…"
+            placeholder="직접 입력"
             class="w-14 text-center bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-emerald-500"
           />
           <button
@@ -217,7 +217,7 @@ onMounted(fetchData);
             :disabled="saving[set_id]"
             class="bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold px-3 py-1.5 rounded-lg text-sm transition-colors"
           >
-            Save
+            저장
           </button>
         </div>
 
@@ -227,7 +227,7 @@ onMounted(fetchData);
           :disabled="saving[set_id]"
           class="mt-3 w-full text-slate-500 hover:text-slate-300 text-sm py-1 transition-colors"
         >
-          Pass today
+          오늘 패스
         </button>
       </div>
     </div>

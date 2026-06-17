@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { ReadingLog, ReadingSet, ReadingSetItem } from "~/types";
 import { calcTotalPages } from "~/composables/useScheduler";
+import { PencilIcon } from "@heroicons/vue/24/outline";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
-const monthLogs = ref<ReadingLog[]>([]); // logs for the visible calendar month
-const allLogs = ref<ReadingLog[]>([]); // all-time logs, for streak + cumulative stats
+const monthLogs = ref<ReadingLog[]>([]);
+const allLogs = ref<ReadingLog[]>([]);
 const sets = ref<(ReadingSet & { items: ReadingSetItem[] })[]>([]);
 const selectedSetId = ref<string>("");
 
@@ -32,6 +33,12 @@ const monthDisplay = computed(() => {
   return `${y}년 ${m}월`;
 });
 
+// 달력은 선택된 세트의 로그만 표시
+const filteredMonthLogs = computed(() => {
+  if (!selectedSetId.value) return monthLogs.value;
+  return monthLogs.value.filter((l) => l.set_id === selectedSetId.value);
+});
+
 const calendarDays = computed(() => {
   const [y, m] = splitMonth(currentMonth.value);
   const first = new Date(y, m - 1, 1);
@@ -43,7 +50,7 @@ const calendarDays = computed(() => {
   }
   for (let d = 1; d <= last.getDate(); d++) {
     const date = `${currentMonth.value}-${String(d).padStart(2, "0")}`;
-    const log = monthLogs.value.find((l) => l.log_date === date) ?? null;
+    const log = filteredMonthLogs.value.find((l) => l.log_date === date) ?? null;
     days.push({ date, log });
   }
   return days;
@@ -57,7 +64,6 @@ const stats = computed(() => {
     return s;
   }, 0);
 
-  // Streak: consecutive days (from today backward) with completed or partial
   const sortedLogs = [...allLogs.value]
     .filter((l) => l.status === "completed" || l.status === "partial")
     .sort((a, b) => b.log_date.localeCompare(a.log_date));
@@ -79,7 +85,6 @@ const stats = computed(() => {
   return { completed, totalLogged, totalPages, streak, completedSets };
 });
 
-// Sets shown in the selector: active first, then by most recent
 const selectableSets = computed(() => {
   return [...sets.value].sort((a, b) => {
     if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
@@ -87,7 +92,6 @@ const selectableSets = computed(() => {
   });
 });
 
-// Progress for the selected set: pages read so far / total pages across all reread rounds
 const selectedSetProgress = computed(() => {
   const set = sets.value.find((s) => s.id === selectedSetId.value);
   if (!set) return null;
@@ -102,6 +106,11 @@ const selectedSetProgress = computed(() => {
 
 watch(selectableSets, (list) => {
   if (!selectedSetId.value && list.length > 0) selectedSetId.value = list[0]!.id;
+});
+
+// 세트 변경 시 달력 월별 로그 다시 필터링 (이미 filteredMonthLogs에서 처리)
+watch(selectedSetId, () => {
+  fetchMonthLogs();
 });
 
 function prevMonth() {
@@ -153,49 +162,61 @@ onMounted(fetchAll);
 
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold mb-6">Statistics</h1>
+    <h1 class="text-2xl font-bold mb-6">Stats</h1>
 
-    <!-- Set progress -->
+    <!-- Set selector (분리된 상단 카드) -->
     <div v-if="selectableSets.length > 0" class="bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-4">
       <select
         v-model="selectedSetId"
-        class="w-full bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 mb-4"
+        class="w-full bg-slate-700 border border-slate-600 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500"
       >
         <option v-for="set in selectableSets" :key="set.id" :value="set.id">
-          {{ set.name }}{{ set.is_active ? "" : " (Paused)" }}
+          {{ set.name }}{{ set.is_active ? "" : " (일시중지)" }}
         </option>
       </select>
+    </div>
 
-      <div v-if="selectedSetProgress" class="flex items-center gap-5">
+    <!-- Set progress -->
+    <div v-if="selectedSetProgress" class="bg-slate-800 rounded-2xl p-4 border border-slate-700 mb-4">
+      <div class="flex items-center gap-5">
         <DonutProgress :percent="selectedSetProgress.percent" :size="100" />
-        <div>
-          <p class="font-semibold mb-1">{{ selectedSetProgress.name }}</p>
-          <p class="text-emerald-400 text-sm">
-            {{ selectedSetProgress.pagesRead.toLocaleString() }} / {{ selectedSetProgress.totalPages.toLocaleString() }} pages
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <p class="font-semibold truncate">{{ selectedSetProgress.name }}</p>
+            <NuxtLink
+              :to="`/sets/${selectedSetId}/edit`"
+              class="flex-shrink-0 p-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-white transition-colors"
+              title="편집"
+            >
+              <PencilIcon class="w-4 h-4" />
+            </NuxtLink>
+          </div>
+          <p class="text-emerald-400 text-sm mt-1">
+            {{ selectedSetProgress.pagesRead.toLocaleString() }} / {{ selectedSetProgress.totalPages.toLocaleString() }}쪽
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Stats cards -->
-    <div class="grid grid-cols-2 gap-3 mb-6">
-      <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700 text-center">
-        <p class="text-2xl font-bold text-emerald-400">{{ stats.streak }}</p>
-        <p class="text-xs text-slate-400 mt-1">Streak days</p>
+    <!-- Stats cards (가로 한 줄) -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-400">{{ stats.streak }}</p>
+        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">연속<br/>일수</p>
       </div>
-      <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700 text-center">
-        <p class="text-2xl font-bold text-emerald-400">{{ stats.totalPages.toLocaleString() }}</p>
-        <p class="text-xs text-slate-400 mt-1">Total pages read</p>
+      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-400">{{ stats.totalPages.toLocaleString() }}</p>
+        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">총 읽은<br/>쪽수</p>
       </div>
-      <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700 text-center">
-        <p class="text-2xl font-bold text-emerald-400">
+      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-400">
           {{ stats.totalLogged > 0 ? Math.round((stats.completed / stats.totalLogged) * 100) : 0 }}%
         </p>
-        <p class="text-xs text-slate-400 mt-1">Completion rate</p>
+        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">완료율</p>
       </div>
-      <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700 text-center">
-        <p class="text-2xl font-bold text-emerald-400">{{ stats.completedSets }}</p>
-        <p class="text-xs text-slate-400 mt-1">Sets finished</p>
+      <div class="bg-slate-800 rounded-2xl p-3 border border-slate-700 text-center flex-1 min-w-[72px]">
+        <p class="text-xl font-bold text-emerald-400">{{ stats.completedSets }}</p>
+        <p class="text-[10px] text-slate-400 mt-0.5 leading-tight">끝난<br/>세트</p>
       </div>
     </div>
 
@@ -208,7 +229,7 @@ onMounted(fetchAll);
       </div>
 
       <div class="grid grid-cols-7 gap-1 mb-1">
-        <div v-for="d in ['S','M','T','W','T','F','S']" :key="d" class="text-center text-xs text-slate-500 py-1">
+        <div v-for="d in ['일','월','화','수','목','금','토']" :key="d" class="text-center text-xs text-slate-500 py-1">
           {{ d }}
         </div>
       </div>
@@ -231,10 +252,10 @@ onMounted(fetchAll);
 
       <!-- Legend -->
       <div class="flex gap-3 mt-4 justify-center text-xs text-slate-500">
-        <span>🟢 Done</span>
-        <span>🟡 Partial</span>
-        <span>🔴 Missed</span>
-        <span>⚪ Passed</span>
+        <span>🟢 완료</span>
+        <span>🟡 부분</span>
+        <span>🔴 미완</span>
+        <span>⚪ 패스</span>
       </div>
     </div>
   </div>

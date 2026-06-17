@@ -29,14 +29,14 @@ async function signup() {
     </div>
 
     <div v-if="done" class="text-center space-y-4">
-      <p class="text-emerald-400 font-semibold">Check your email!</p>
-      <p class="text-slate-400 text-sm">We sent a confirmation link to <strong>{{ email }}</strong>.</p>
-      <NuxtLink to="/login" class="text-emerald-400 hover:underline text-sm">Back to login</NuxtLink>
+      <p class="text-emerald-400 font-semibold">이메일을 확인해주세요!</p>
+      <p class="text-slate-400 text-sm"><strong>{{ email }}</strong>로 인증 링크를 보냈어요.</p>
+      <NuxtLink to="/login" class="text-emerald-400 hover:underline text-sm">로그인으로 돌아가기</NuxtLink>
     </div>
 
     <form v-else @submit.prevent="signup" class="space-y-4">
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Email</label>
+        <label class="block text-sm text-slate-400 mb-1">이메일</label>
         <input
           v-model="email"
           type="email"
@@ -46,14 +46,14 @@ async function signup() {
         />
       </div>
       <div>
-        <label class="block text-sm text-slate-400 mb-1">Password</label>
+        <label class="block text-sm text-slate-400 mb-1">비밀번호</label>
         <input
           v-model="password"
           type="password"
           required
           minlength="6"
           class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500 transition-colors"
-          placeholder="Min 6 characters"
+          placeholder="6자 이상"
         />
       </div>
 
@@ -64,13 +64,13 @@ async function signup() {
         :disabled="loading"
         class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-semibold py-3 rounded-xl transition-colors"
       >
-        {{ loading ? "Creating account..." : "Create account" }}
+        {{ loading ? "계정 생성 중..." : "회원가입" }}
       </button>
     </form>
 
     <p class="text-center text-sm text-slate-500 mt-6">
-      Already have an account?
-      <NuxtLink to="/login" class="text-emerald-400 hover:underline">Sign in</NuxtLink>
+      이미 계정이 있으신가요?
+      <NuxtLink to="/login" class="text-emerald-400 hover:underline">로그인</NuxtLink>
     </p>
   </div>
 </template>

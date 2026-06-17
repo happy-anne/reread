@@ -12,6 +12,7 @@ const setId = route.params.id as string;
 const books = ref<Book[]>([]);
 const saving = ref(false);
 const loading = ref(true);
+const currentSet = ref<ReadingSet | null>(null);
 
 const form = reactive({
   name: "",
@@ -41,6 +42,7 @@ async function fetchData() {
 
   if (setData) {
     const s = setData as ReadingSet & { items: ReadingSetItem[] };
+    currentSet.value = s;
     form.name = s.name;
     form.reread_count = s.reread_count;
     form.start_date = s.start_date;
@@ -112,6 +114,18 @@ async function save() {
   navigateTo("/sets");
 }
 
+async function toggleActive() {
+  if (!currentSet.value) return;
+  await supabase.from("reading_sets").update({ is_active: !currentSet.value.is_active }).eq("id", setId);
+  await fetchData();
+}
+
+async function deleteSet() {
+  if (!confirm("이 읽기 세트를 삭제할까요? 기록도 함께 삭제됩니다.")) return;
+  await supabase.from("reading_sets").delete().eq("id", setId);
+  navigateTo("/sets");
+}
+
 onMounted(fetchData);
 </script>
 
@@ -119,15 +133,15 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <div class="flex items-center gap-3 mb-6">
       <NuxtLink to="/sets" class="text-slate-400 hover:text-white">←</NuxtLink>
-      <h1 class="text-2xl font-bold">Edit Reading Set</h1>
+      <h1 class="text-2xl font-bold">읽기 세트 편집</h1>
     </div>
 
-    <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
+    <div v-if="loading" class="text-slate-500 text-sm">불러오는 중...</div>
 
     <form v-else @submit.prevent="save" class="space-y-6">
       <!-- Set name -->
       <div>
-        <label class="text-sm text-slate-400 block mb-1">Set name</label>
+        <label class="text-sm text-slate-400 block mb-1">세트 이름</label>
         <input
           v-model="form.name"
           required
@@ -137,7 +151,7 @@ onMounted(fetchData);
 
       <!-- Book selection -->
       <div>
-        <label class="text-sm text-slate-400 block mb-2">Select books</label>
+        <label class="text-sm text-slate-400 block mb-2">책 선택</label>
         <div class="space-y-2">
           <button
             v-for="book in books"
@@ -159,7 +173,7 @@ onMounted(fetchData);
 
       <!-- Reading order -->
       <div v-if="selectedBooks.length > 1">
-        <label class="text-sm text-slate-400 block mb-2">Reading order (drag to reorder)</label>
+        <label class="text-sm text-slate-400 block mb-2">읽는 순서 (드래그로 변경)</label>
         <draggable v-model="selectedBooks" item-key="temp_id" handle=".drag-handle" class="space-y-2">
           <template #item="{ element, index }">
             <div class="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">
@@ -173,7 +187,7 @@ onMounted(fetchData);
 
       <!-- Reread count -->
       <div>
-        <label class="text-sm text-slate-400 block mb-1">Reread count</label>
+        <label class="text-sm text-slate-400 block mb-1">회독 횟수</label>
         <input
           v-model.number="form.reread_count"
           type="number"
@@ -187,7 +201,7 @@ onMounted(fetchData);
       <!-- Dates -->
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="text-sm text-slate-400 block mb-1">Start date</label>
+          <label class="text-sm text-slate-400 block mb-1">시작일</label>
           <input
             v-model="form.start_date"
             type="date"
@@ -196,7 +210,7 @@ onMounted(fetchData);
           />
         </div>
         <div>
-          <label class="text-sm text-slate-400 block mb-1">End date</label>
+          <label class="text-sm text-slate-400 block mb-1">종료일</label>
           <input
             v-model="form.end_date"
             type="date"
@@ -208,7 +222,7 @@ onMounted(fetchData);
 
       <!-- Rest days -->
       <div>
-        <label class="text-sm text-slate-400 block mb-2">Rest days</label>
+        <label class="text-sm text-slate-400 block mb-2">쉬는 날</label>
         <div class="flex gap-2">
           <button
             v-for="(label, idx) in DAY_LABELS"
@@ -229,19 +243,19 @@ onMounted(fetchData);
 
       <!-- Schedule preview -->
       <div v-if="totalPages > 0 && dailyPages > 0" class="bg-slate-800 rounded-2xl p-4 border border-slate-700">
-        <p class="text-xs text-slate-400 mb-2">Schedule preview</p>
+        <p class="text-xs text-slate-400 mb-2">스케줄 미리보기</p>
         <div class="grid grid-cols-3 gap-3 text-center">
           <div>
             <p class="text-xl font-bold text-emerald-400">{{ totalPages.toLocaleString() }}</p>
-            <p class="text-xs text-slate-500">Total pages</p>
+            <p class="text-xs text-slate-500">총 쪽수</p>
           </div>
           <div>
             <p class="text-xl font-bold text-emerald-400">{{ readingDays }}</p>
-            <p class="text-xs text-slate-500">Reading days</p>
+            <p class="text-xs text-slate-500">읽는 날</p>
           </div>
           <div>
             <p class="text-xl font-bold text-emerald-400">{{ dailyPages }}</p>
-            <p class="text-xs text-slate-500">Pages/day</p>
+            <p class="text-xs text-slate-500">일일 쪽수</p>
           </div>
         </div>
       </div>
@@ -251,8 +265,30 @@ onMounted(fetchData);
         :disabled="saving || selectedBooks.length === 0"
         class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-slate-950 font-semibold py-3 rounded-xl transition-colors"
       >
-        {{ saving ? "Saving..." : "Save Changes" }}
+        {{ saving ? "저장 중..." : "변경사항 저장" }}
       </button>
+
+      <!-- Danger zone -->
+      <div class="border border-slate-700 rounded-2xl p-4 space-y-2 mt-2">
+        <p class="text-xs text-slate-500 mb-3">위험 영역</p>
+        <button
+          type="button"
+          @click="toggleActive"
+          class="w-full text-sm py-2.5 rounded-xl transition-colors"
+          :class="currentSet?.is_active
+            ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
+            : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'"
+        >
+          {{ currentSet?.is_active ? "일시중지" : "다시 시작" }}
+        </button>
+        <button
+          type="button"
+          @click="deleteSet"
+          class="w-full text-sm bg-slate-700 hover:bg-red-900/30 text-red-400 hover:text-red-300 py-2.5 rounded-xl transition-colors"
+        >
+          세트 삭제
+        </button>
+      </div>
     </form>
   </div>
 </template>

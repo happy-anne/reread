@@ -114,9 +114,9 @@ onMounted(() => {
     <div class="space-y-4">
       <!-- Notification -->
       <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
-        <h2 class="font-semibold mb-3">Notification</h2>
+        <h2 class="font-semibold mb-3">알림</h2>
         <div>
-          <label class="text-sm text-slate-400 block mb-1">Reminder time</label>
+          <label class="text-sm text-slate-400 block mb-1">알림 시간</label>
           <input
             v-model="notificationTime"
             type="time"
@@ -127,8 +127,8 @@ onMounted(() => {
 
       <!-- Rest days (default) -->
       <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
-        <h2 class="font-semibold mb-1">Default rest days</h2>
-        <p class="text-slate-400 text-xs mb-3">Pre-fills new reading sets. Each set can still override this.</p>
+        <h2 class="font-semibold mb-1">기본 쉬는 날</h2>
+        <p class="text-slate-400 text-xs mb-3">새 읽기 세트에 기본 적용돼요. 각 세트에서 변경할 수 있어요.</p>
         <div class="flex gap-2">
           <button
             v-for="(label, idx) in DAY_LABELS"
@@ -152,12 +152,12 @@ onMounted(() => {
         :disabled="saving"
         class="w-full bg-emerald-500 disabled:opacity-40 text-slate-950 font-semibold py-2.5 rounded-xl text-sm transition-colors"
       >
-        {{ saving ? "Saving..." : savedMsg ? "Saved!" : "Save Settings" }}
+        {{ saving ? "저장 중..." : savedMsg ? "저장됨!" : "설정 저장" }}
       </button>
 
       <!-- Security -->
       <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
-        <h2 class="font-semibold mb-1">Security</h2>
+        <h2 class="font-semibold mb-1">보안</h2>
         <p class="text-slate-400 text-xs mb-4">
           매번 로그인하지 않도록 4자리 PIN으로 앱을 빠르게 잠금 해제할 수 있어요.
         </p>
@@ -186,7 +186,7 @@ onMounted(() => {
 
       <!-- Account -->
       <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700">
-        <h2 class="font-semibold mb-1">Account</h2>
+        <h2 class="font-semibold mb-1">계정</h2>
         <p class="text-slate-400 text-sm mb-1">{{ user?.email }}</p>
         <p v-if="daysRemaining !== null" class="text-xs mb-4" :class="daysRemaining <= 5 ? 'text-yellow-400' : 'text-slate-500'">
           로그인 세션 D-{{ daysRemaining }}
@@ -195,7 +195,7 @@ onMounted(() => {
           @click="signOut"
           class="w-full bg-slate-700 hover:bg-red-900/30 text-red-400 hover:text-red-300 font-semibold py-2.5 rounded-xl text-sm transition-colors"
         >
-          Sign out
+          로그아웃
         </button>
       </div>
     </div>

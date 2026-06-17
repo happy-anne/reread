@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ReadingSet, ReadingSetItem } from "~/types";
+import { PencilIcon } from "@heroicons/vue/24/outline";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -18,7 +19,6 @@ async function fetchSets() {
   loading.value = false;
 }
 
-// Active sets first (newest first), inactive (paused) sets always sink to the bottom
 const sortedSets = computed(() => {
   return [...sets.value].sort((a, b) => {
     if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
@@ -26,23 +26,12 @@ const sortedSets = computed(() => {
   });
 });
 
-async function deleteSet(id: string) {
-  if (!confirm("Delete this reading set?")) return;
-  await supabase.from("reading_sets").delete().eq("id", id);
-  await fetchSets();
-}
-
-async function toggleActive(set: ReadingSet) {
-  await supabase.from("reading_sets").update({ is_active: !set.is_active }).eq("id", set.id);
-  await fetchSets();
-}
-
 function getStatus(set: ReadingSet) {
-  if (!set.is_active) return { label: "Paused", color: "text-slate-500" };
+  if (!set.is_active) return { label: "일시중지", color: "text-slate-500" };
   const today = new Date().toISOString().slice(0, 10);
-  if (set.end_date < today) return { label: "Completed", color: "text-emerald-400" };
-  if (set.start_date > today) return { label: "Upcoming", color: "text-blue-400" };
-  return { label: "Active", color: "text-yellow-400" };
+  if (set.end_date < today) return { label: "완료", color: "text-emerald-400" };
+  if (set.start_date > today) return { label: "예정", color: "text-blue-400" };
+  return { label: "진행 중", color: "text-yellow-400" };
 }
 
 onMounted(fetchSets);
@@ -51,21 +40,21 @@ onMounted(fetchSets);
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Reading Sets</h1>
+      <h1 class="text-2xl font-bold">Sets</h1>
       <NuxtLink
         to="/sets/new"
         class="bg-emerald-500 text-slate-950 font-semibold px-4 py-2 rounded-xl text-sm"
       >
-        + New Set
+        + 새 세트
       </NuxtLink>
     </div>
 
-    <div v-if="loading" class="text-slate-500 text-sm">Loading...</div>
+    <div v-if="loading" class="text-slate-500 text-sm">불러오는 중...</div>
 
     <div v-else-if="sets.length === 0" class="text-center py-16 text-slate-500">
       <p class="text-4xl mb-3">📋</p>
-      <p>No reading sets yet.</p>
-      <p class="text-sm mt-1">Create a set to start your re-reading plan.</p>
+      <p>아직 읽기 세트가 없어요.</p>
+      <p class="text-sm mt-1">세트를 만들어 회독 계획을 시작해보세요.</p>
     </div>
 
     <div v-else class="space-y-3">
@@ -79,7 +68,7 @@ onMounted(fetchSets);
           <div>
             <h3 class="font-semibold">{{ set.name }}</h3>
             <p class="text-slate-400 text-xs mt-0.5">
-              {{ set.reread_count }}x • {{ set.start_date }} ~ {{ set.end_date }}
+              {{ set.reread_count }}회독 • {{ set.start_date }} ~ {{ set.end_date }}
             </p>
           </div>
           <span class="text-xs whitespace-nowrap ml-2" :class="getStatus(set).color">{{ getStatus(set).label }}</span>
@@ -95,30 +84,14 @@ onMounted(fetchSets);
           </span>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex justify-end">
           <NuxtLink
             :to="`/sets/${set.id}/edit`"
-            class="flex-1 text-center text-sm bg-slate-700 hover:bg-slate-600 text-slate-200 py-1.5 rounded-lg transition-colors"
+            class="flex items-center gap-1.5 text-sm bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-lg transition-colors"
+            title="편집"
           >
-            Edit
+            <PencilIcon class="w-4 h-4" />
           </NuxtLink>
-          <button
-            @click="toggleActive(set)"
-            class="flex-1 text-sm py-1.5 rounded-lg transition-colors"
-            :class="
-              set.is_active
-                ? 'bg-slate-700 hover:bg-slate-600 text-slate-300'
-                : 'bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400'
-            "
-          >
-            {{ set.is_active ? "Pause" : "Resume" }}
-          </button>
-          <button
-            @click="deleteSet(set.id)"
-            class="flex-1 text-sm bg-slate-700 hover:bg-red-900/30 text-red-400 hover:text-red-300 py-1.5 rounded-lg transition-colors"
-          >
-            Delete
-          </button>
         </div>
       </div>
     </div>
