@@ -39,7 +39,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
 
 <template>
   <div class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-6">
-    <h1 class="text-3xl font-bold text-black mb-2">re:read</h1>
+    <h1 class="mb-2"><AppLogo size="text-3xl" /></h1>
     <p class="text-gray-400 text-sm mb-8">PIN을 입력하세요</p>
 
     <div class="flex gap-4 mb-2" :class="{ 'animate-pulse': error }">

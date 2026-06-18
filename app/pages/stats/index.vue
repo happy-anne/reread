@@ -22,11 +22,11 @@ function splitMonth(monthStr: string): [number, number] {
   return [parts[0]!, parts[1]!];
 }
 
-const statusEmoji: Record<string, string> = {
-  completed: "🟢",
-  partial: "🟡",
-  not_done: "🔴",
-  passed: "⚪",
+const statusColor: Record<string, string> = {
+  completed: "#22C55E",
+  partial: "#FFA72C",
+  not_done: "#ff4d50",
+  passed: "#AAA",
 };
 
 const monthDisplay = computed(() => {
@@ -183,7 +183,7 @@ onMounted(fetchAll);
         <DonutProgress
           :percent="selectedSetProgress.percent"
           :size="100"
-          :colorClass="getSetColor(sets.find(s=>s.id===selectedSetId)?.color??'').accent"
+          :strokeHex="getSetColor(sets.find(s=>s.id===selectedSetId)?.color??'').hex"
         />
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-2">
@@ -252,19 +252,30 @@ onMounted(fetchAll);
         >
           <template v-if="day.date">
             <span class="text-gray-500">{{ parseInt(day.date.slice(-2)) }}</span>
-            <span v-if="day.log" class="text-xs leading-none mt-0.5">
-              {{ statusEmoji[day.log.status] }}
-            </span>
+            <span
+              v-if="day.log"
+              class="mt-0.5 rounded-full flex-shrink-0"
+              style="width:8px;height:8px;display:inline-block"
+              :style="{ backgroundColor: statusColor[day.log.status] }"
+            />
           </template>
         </div>
       </div>
 
       <!-- Legend -->
-      <div class="flex gap-3 mt-4 justify-center text-xs text-gray-400">
-        <span>🟢 완료</span>
-        <span>🟡 부분</span>
-        <span>🔴 미완</span>
-        <span>⚪ 패스</span>
+      <div class="flex gap-4 mt-4 justify-center text-xs text-gray-400">
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block rounded-full" style="width:8px;height:8px;background:#22C55E" />완료
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block rounded-full" style="width:8px;height:8px;background:#FFA72C" />부분
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block rounded-full" style="width:8px;height:8px;background:#ff4d50" />미완
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="inline-block rounded-full" style="width:8px;height:8px;background:#AAA" />패스
+        </span>
       </div>
     </div>
   </div>

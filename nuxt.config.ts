@@ -25,7 +25,7 @@ export default defineNuxtConfig({
     head: {
       title: "re:read",
       meta: [
-        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" },
         { name: "description", content: "Read again. With a plan." },
         { name: "theme-color", content: "#0f172a" },
       ],

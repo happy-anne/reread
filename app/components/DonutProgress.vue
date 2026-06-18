@@ -2,7 +2,7 @@
 const props = defineProps<{
   percent: number;
   size?: number;
-  colorClass?: string;
+  strokeHex?: string;
 }>();
 
 const size = props.size ?? 120;
@@ -14,7 +14,7 @@ const offset = computed(() => {
   return circumference - (clamped / 100) * circumference;
 });
 
-const color = computed(() => props.colorClass ?? "text-emerald-600");
+const color = computed(() => props.strokeHex ?? "#34d399");
 </script>
 
 <template>
@@ -28,14 +28,14 @@ const color = computed(() => props.colorClass ?? "text-emerald-600");
         fill="none"
         stroke-width="10"
         stroke-linecap="round"
-        :class="[color, 'transition-all duration-500']"
-        stroke="currentColor"
+        :stroke="color"
+        class="transition-all duration-500"
         :stroke-dasharray="circumference"
         :stroke-dashoffset="offset"
       />
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
-      <span class="text-xl font-bold" :class="color">{{ Math.round(percent) }}%</span>
+      <span class="text-xl font-bold" :style="{ color }">{{ Math.round(percent) }}%</span>
     </div>
   </div>
 </template>

@@ -145,11 +145,8 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             type="button"
             @click="toggleRestDay(idx)"
             class="flex-1 py-2 rounded-full text-xs font-medium transition-colors"
-            :class="
-              restDays.includes(idx)
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            "
+            :style="restDays.includes(idx) ? 'background:#000;color:#fff' : ''"
+            :class="restDays.includes(idx) ? '' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
           >
             {{ label }}
           </button>

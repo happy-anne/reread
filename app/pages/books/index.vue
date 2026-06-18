@@ -76,10 +76,10 @@ onMounted(fetchBooks);
       <h1 class="text-2xl font-bold text-black">Books</h1>
       <button
         @click="openCreate"
-        class="bg-black text-white font-medium px-4 py-2 rounded-full text-sm"
-      >
-        + Add
-      </button>
+        class="text-black leading-none"
+        style="font-size:24px"
+        title="Add"
+      >+</button>
     </div>
 
     <div v-if="loading" class="text-gray-400 text-sm">불러오는 중...</div>

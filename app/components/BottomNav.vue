@@ -23,7 +23,7 @@ const navItems = [
   { to: "/books", label: "Books", icon: BookOpenIcon },
   { to: "/sets", label: "Sets", icon: ListBulletIcon },
   { to: "/stats", label: "Stats", icon: ChartBarIcon },
-  { to: "/settings", label: "설정", icon: Cog6ToothIcon },
+  { to: "/settings", label: "Settings", icon: Cog6ToothIcon },
 ];
 
 function isActive(path: string) {

@@ -153,7 +153,7 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <!-- Brand header -->
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-black tracking-tight">re:read</h1>
+      <h1 class="mb-1"><AppLogo size="text-4xl" /></h1>
       <p class="text-gray-400 text-xs mt-1">Read again. With a plan.</p>
     </div>
 
@@ -171,13 +171,18 @@ onMounted(fetchData);
       <div
         v-for="{ set_id, schedule } in todaySchedules"
         :key="set_id"
-        class="rounded-3xl p-5 sm:p-6 border"
-        :class="[getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').cardBg, getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').cardBorder]"
+        class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100"
       >
-        <!-- Set name + round -->
-        <p class="text-center text-xs text-gray-400 font-medium mb-4">
-          {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
-        </p>
+        <!-- Set name + color dot + round -->
+        <div class="flex items-center justify-center gap-2 mb-4">
+          <span
+            class="w-2.5 h-2.5 rounded-full flex-shrink-0"
+            :style="{ backgroundColor: getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').hex }"
+          />
+          <p class="text-xs text-gray-400 font-medium">
+            {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
+          </p>
+        </div>
 
         <!-- Status illustration -->
         <StatusIllustration :status="getStatus(set_id)" />
@@ -195,9 +200,10 @@ onMounted(fetchData);
             class="px-3 py-1.5 rounded-full text-sm font-mono transition-colors"
             :class="
               getLog(set_id)?.actual_page === p
-                ? 'bg-black text-white font-bold'
-                : 'bg-white hover:bg-gray-100 text-gray-800'
+                ? 'text-white font-bold'
+                : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-100'
             "
+            :style="getLog(set_id)?.actual_page === p ? 'background-color:#0000ee' : ''"
           >
             {{ p }}
           </button>
@@ -207,14 +213,15 @@ onMounted(fetchData);
             type="number"
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
-            placeholder="직접 입력"
-            class="w-20 text-center bg-white border border-gray-200 rounded-full px-2 py-1.5 text-sm outline-none focus:border-gray-400"
+            placeholder="직접"
+            class="w-16 text-center bg-white border border-gray-200 rounded-full px-2 py-1.5 outline-none focus:border-gray-400"
           />
           <button
             v-if="pageInput[set_id]"
             @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
             :disabled="saving[set_id]"
-            class="bg-black disabled:opacity-40 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors"
+            class="disabled:opacity-40 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors"
+            style="background-color:#0000ee"
           >
             저장
           </button>

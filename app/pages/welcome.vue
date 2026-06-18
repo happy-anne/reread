@@ -25,14 +25,17 @@ onMounted(() => {
 <template>
   <div class="w-full max-w-sm text-center">
     <div class="mb-12">
-      <h1 class="text-5xl font-bold text-black tracking-tight min-h-[3.5rem]">
-        {{ LOGO.slice(0, logoChars) }}<span v-if="logoChars < LOGO.length" class="animate-pulse opacity-60">|</span>
+      <h1 class="text-5xl font-bold tracking-tight min-h-[3.5rem]">
+        <span class="text-black">{{ "re".slice(0, Math.min(logoChars, 2)) }}</span>
+        <span v-if="logoChars > 2" style="color:#0000ee">:</span>
+        <span class="text-black">{{ "read".slice(0, Math.max(0, logoChars - 3)) }}</span>
+        <span v-if="logoChars < LOGO.length" class="animate-pulse opacity-40 text-black">|</span>
       </h1>
-      <p class="text-gray-500 text-sm mt-2">Read again. With a plan.</p>
+      <p class="text-gray-400 text-sm mt-2">Read again. With a plan.</p>
     </div>
 
     <div
-      class="text-gray-600 text-base leading-[1.5] transition-opacity duration-700"
+      class="text-gray-500 text-sm leading-[1.5] transition-opacity duration-700"
       :class="showDesc ? 'opacity-100' : 'opacity-0'"
     >
       <p>읽고 싶은 책들을 골라</p>

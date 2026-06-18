@@ -26,7 +26,7 @@ async function login() {
 <template>
   <div class="w-full max-w-sm">
     <div class="mb-10 text-center">
-      <h1 class="text-5xl font-bold text-black tracking-tight">re:read</h1>
+      <h1 class="mb-1"><AppLogo /></h1>
       <p class="text-gray-400 text-sm mt-2">Read again. With a plan.</p>
     </div>
 
@@ -37,7 +37,7 @@ async function login() {
           v-model="email"
           type="email"
           required
-          class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
+          class="w-full bg-gray-100 rounded-xl px-4 py-3 outline-none focus:bg-gray-200 transition-colors"
           placeholder="you@example.com"
         />
       </div>
@@ -47,7 +47,7 @@ async function login() {
           v-model="password"
           type="password"
           required
-          class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
+          class="w-full bg-gray-100 rounded-xl px-4 py-3 outline-none focus:bg-gray-200 transition-colors"
           placeholder="••••••••"
         />
       </div>
