@@ -30,9 +30,9 @@ const sortedSets = computed(() => {
 function getStatus(set: ReadingSet) {
   if (!set.is_active) return { label: "일시중지", color: "text-gray-400" };
   const today = new Date().toISOString().slice(0, 10);
-  if (set.end_date < today) return { label: "완료", color: "text-emerald-600" };
-  if (set.start_date > today) return { label: "예정", color: "text-blue-500" };
-  return { label: "진행 중", color: "text-amber-500" };
+  if (set.end_date < today) return { label: "완료", color: "text-gray-500" };
+  if (set.start_date > today) return { label: "예정", color: "text-gray-500" };
+  return { label: "진행 중", color: "text-gray-700" };
 }
 
 onMounted(fetchSets);
@@ -41,10 +41,10 @@ onMounted(fetchSets);
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">Sets</h1>
+      <h1 class="text-2xl font-bold text-black">Sets</h1>
       <NuxtLink
         to="/sets/new"
-        class="bg-emerald-500 text-gray-900 font-semibold px-4 py-2 rounded-xl text-sm"
+        class="bg-black text-white font-medium px-4 py-2 rounded-full text-sm"
       >
         + 새 세트
       </NuxtLink>
@@ -71,20 +71,20 @@ onMounted(fetchSets);
           <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" :class="getSetColor(set.color).dot" />
             <div>
-              <h3 class="font-semibold">{{ set.name }}</h3>
-              <p class="text-gray-500 text-xs mt-0.5">
+              <h3 class="font-semibold text-black">{{ set.name }}</h3>
+              <p class="text-gray-400 text-xs mt-0.5">
                 {{ set.reread_count }}회독 • {{ set.start_date }} ~ {{ set.end_date }}
               </p>
             </div>
           </div>
-          <span class="text-xs whitespace-nowrap ml-2" :class="getStatus(set).color">{{ getStatus(set).label }}</span>
+          <span class="text-xs whitespace-nowrap ml-2 font-medium" :class="getStatus(set).color">{{ getStatus(set).label }}</span>
         </div>
 
         <div class="flex flex-wrap gap-1 mb-3 pl-[18px]">
           <span
             v-for="item in [...(set.items ?? [])].sort((a, b) => a.order_index - b.order_index)"
             :key="item.id"
-            class="text-xs bg-white/60 rounded-lg px-2 py-0.5 text-gray-600 border border-white/80"
+            class="text-xs bg-white/70 rounded-full px-2.5 py-0.5 text-gray-500 border border-white/80"
           >
             {{ item.book?.title ?? "?" }}
           </span>
@@ -93,7 +93,7 @@ onMounted(fetchSets);
         <div class="flex justify-end">
           <NuxtLink
             :to="`/sets/${set.id}/edit`"
-            class="flex items-center gap-1.5 text-sm bg-white/60 hover:bg-white text-gray-600 px-3 py-1.5 rounded-lg transition-colors border border-white/80"
+            class="flex items-center gap-1.5 text-sm bg-white/70 hover:bg-white text-gray-500 hover:text-gray-800 px-3 py-1.5 rounded-full transition-colors border border-white/80"
             title="편집"
           >
             <PencilIcon class="w-4 h-4" />

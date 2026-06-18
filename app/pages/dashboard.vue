@@ -36,7 +36,6 @@ async function fetchData() {
 
   activeSets.value = (sets as any[]) ?? [];
 
-  // Fetch all logs for these sets (needed to determine actual current position)
   const setIds = activeSets.value.map((s) => s.id);
   if (setIds.length > 0) {
     const { data: logs } = await supabase
@@ -49,13 +48,11 @@ async function fetchData() {
     allLogs.value = [];
   }
 
-  // Compute today's live (auto-redistributed) schedule per set
   todaySchedules.value = [];
   for (const set of activeSets.value) {
     const setLogs = allLogs.value.filter((l) => l.set_id === set.id);
     const liveSchedule = computeLiveSchedule(set, set.items, today, setLogs);
 
-    // If today was already logged, show the exact persisted target range
     const todayLog = setLogs.find((l) => l.log_date === today);
     const schedule: DailySchedule | null = todayLog
       ? {
@@ -156,7 +153,7 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <!-- Brand header -->
     <div class="text-center mb-8">
-      <h1 class="text-4xl font-extrabold text-emerald-600 tracking-tight">re:read</h1>
+      <h1 class="text-4xl font-bold text-black tracking-tight">re:read</h1>
       <p class="text-gray-400 text-xs mt-1">Read again. With a plan.</p>
     </div>
 
@@ -165,7 +162,7 @@ onMounted(fetchData);
     <div v-else-if="todaySchedules.length === 0" class="text-center py-16 text-gray-400">
       <p class="text-4xl mb-3">📚</p>
       <p>오늘 진행 중인 읽기 세트가 없어요.</p>
-      <NuxtLink to="/sets" class="text-emerald-600 text-sm mt-2 inline-block hover:underline">
+      <NuxtLink to="/sets" class="text-black text-sm mt-2 inline-block underline">
         읽기 세트 만들기 →
       </NuxtLink>
     </div>
@@ -177,7 +174,7 @@ onMounted(fetchData);
         class="rounded-3xl p-5 sm:p-6 border"
         :class="[getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').cardBg, getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').cardBorder]"
       >
-        <!-- Set name + round (top of card) -->
+        <!-- Set name + round -->
         <p class="text-center text-xs text-gray-400 font-medium mb-4">
           {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
         </p>
@@ -195,10 +192,10 @@ onMounted(fetchData);
             :key="p"
             @click="saveProgress(set_id, schedule, p)"
             :disabled="saving[set_id]"
-            class="px-3 py-1.5 rounded-lg text-sm font-mono transition-colors"
+            class="px-3 py-1.5 rounded-full text-sm font-mono transition-colors"
             :class="
               getLog(set_id)?.actual_page === p
-                ? 'bg-emerald-500 text-gray-900 font-bold'
+                ? 'bg-black text-white font-bold'
                 : 'bg-white hover:bg-gray-100 text-gray-800'
             "
           >
@@ -211,13 +208,13 @@ onMounted(fetchData);
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
             placeholder="직접 입력"
-            class="w-14 text-center bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-sm outline-none focus:border-emerald-500"
+            class="w-20 text-center bg-white border border-gray-200 rounded-full px-2 py-1.5 text-sm outline-none focus:border-gray-400"
           />
           <button
             v-if="pageInput[set_id]"
             @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
             :disabled="saving[set_id]"
-            class="bg-emerald-500 disabled:opacity-40 text-gray-900 font-semibold px-3 py-1.5 rounded-lg text-sm transition-colors"
+            class="bg-black disabled:opacity-40 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors"
           >
             저장
           </button>
@@ -235,4 +232,3 @@ onMounted(fetchData);
     </div>
   </div>
 </template>
-

@@ -117,25 +117,25 @@ onMounted(() => {
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <div class="flex items-center gap-3 mb-6">
-      <NuxtLink to="/sets" class="text-gray-500 hover:text-gray-900">←</NuxtLink>
-      <h1 class="text-2xl font-bold">새 읽기 세트</h1>
+      <NuxtLink to="/sets" class="text-gray-400 hover:text-black transition-colors">←</NuxtLink>
+      <h1 class="text-2xl font-bold text-black">새 읽기 세트</h1>
     </div>
 
     <form @submit.prevent="save" class="space-y-6">
       <!-- Set name -->
       <div>
-        <label class="text-sm text-gray-500 block mb-1">세트 이름</label>
+        <label class="text-sm font-medium text-gray-700 block mb-1.5">세트 이름</label>
         <input
           v-model="form.name"
           required
           placeholder="예) 2026 고전 읽기"
-          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500"
+          class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
         />
       </div>
 
       <!-- Color picker -->
       <div>
-        <label class="text-sm text-gray-500 block mb-2">세트 색상</label>
+        <label class="text-sm font-medium text-gray-700 block mb-2">세트 색상</label>
         <div class="flex gap-2 flex-wrap">
           <button
             v-for="c in SET_COLORS"
@@ -143,7 +143,7 @@ onMounted(() => {
             type="button"
             @click="form.color = c.id"
             class="w-8 h-8 rounded-full transition-transform"
-            :class="[c.dot, form.color === c.id ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-60 hover:opacity-100']"
+            :class="[c.dot, form.color === c.id ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-80']"
             :title="c.label"
           />
         </div>
@@ -151,9 +151,9 @@ onMounted(() => {
 
       <!-- Book selection -->
       <div>
-        <label class="text-sm text-gray-500 block mb-2">책 선택</label>
+        <label class="text-sm font-medium text-gray-700 block mb-2">책 선택</label>
         <div v-if="books.length === 0" class="text-gray-400 text-sm">
-          아직 책이 없어요. <NuxtLink to="/books" class="text-emerald-600 underline">책을 먼저 추가해주세요.</NuxtLink>
+          아직 책이 없어요. <NuxtLink to="/books" class="text-black underline">책을 먼저 추가해주세요.</NuxtLink>
         </div>
         <div class="space-y-2">
           <button
@@ -161,28 +161,28 @@ onMounted(() => {
             :key="book.id"
             type="button"
             @click="toggleBook(book)"
-            class="w-full text-left px-4 py-3 rounded-xl border transition-colors text-sm"
+            class="w-full text-left px-4 py-3 rounded-xl border-2 transition-colors text-sm"
             :class="
               isSelected(book.id)
-                ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
-                : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400'
+                ? 'bg-black border-black text-white'
+                : 'bg-white border-gray-100 text-gray-600 hover:border-gray-300'
             "
           >
             <span class="font-medium">{{ book.title }}</span>
-            <span class="text-gray-500 ml-2">{{ book.readable_pages }}p</span>
+            <span class="ml-2 opacity-60">{{ book.readable_pages }}p</span>
           </button>
         </div>
       </div>
 
       <!-- Reading order -->
       <div v-if="selectedBooks.length > 1">
-        <label class="text-sm text-gray-500 block mb-2">읽는 순서 (드래그로 변경)</label>
+        <label class="text-sm font-medium text-gray-700 block mb-2">읽는 순서 (드래그로 변경)</label>
         <draggable v-model="selectedBooks" item-key="temp_id" handle=".drag-handle" class="space-y-2">
           <template #item="{ element, index }">
-            <div class="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
+            <div class="flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-3">
               <span class="drag-handle cursor-grab text-gray-400 text-lg select-none">⠿</span>
-              <span class="text-sm text-gray-500 w-5">{{ index + 1 }}</span>
-              <span class="flex-1 text-sm font-medium">{{ element.book.title }}</span>
+              <span class="text-sm text-gray-400 w-5">{{ index + 1 }}</span>
+              <span class="flex-1 text-sm font-medium text-black">{{ element.book.title }}</span>
             </div>
           </template>
         </draggable>
@@ -190,53 +190,53 @@ onMounted(() => {
 
       <!-- Reread count -->
       <div>
-        <label class="text-sm text-gray-500 block mb-1">회독 횟수</label>
+        <label class="text-sm font-medium text-gray-700 block mb-1.5">회독 횟수</label>
         <input
           v-model.number="form.reread_count"
           type="number"
           min="1"
           max="10"
           required
-          class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-emerald-500"
+          class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
         />
       </div>
 
       <!-- Dates -->
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="text-sm text-gray-500 block mb-1">시작일</label>
+          <label class="text-sm font-medium text-gray-700 block mb-1.5">시작일</label>
           <input
             v-model="form.start_date"
             type="date"
             required
-            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500"
+            class="w-full bg-gray-100 rounded-xl px-3 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
           />
         </div>
         <div>
-          <label class="text-sm text-gray-500 block mb-1">종료일</label>
+          <label class="text-sm font-medium text-gray-700 block mb-1.5">종료일</label>
           <input
             v-model="form.end_date"
             type="date"
             required
-            class="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm outline-none focus:border-emerald-500"
+            class="w-full bg-gray-100 rounded-xl px-3 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
           />
         </div>
       </div>
 
       <!-- Rest days -->
       <div>
-        <label class="text-sm text-gray-500 block mb-2">쉬는 날</label>
-        <div class="flex gap-2">
+        <label class="text-sm font-medium text-gray-700 block mb-2">쉬는 날</label>
+        <div class="flex gap-1.5">
           <button
             v-for="(label, idx) in DAY_LABELS"
             :key="idx"
             type="button"
             @click="toggleRestDay(idx)"
-            class="flex-1 py-2 rounded-lg text-xs font-semibold transition-colors border-2"
+            class="flex-1 py-2 rounded-full text-xs font-medium transition-colors"
             :class="
               form.rest_days.includes(idx)
-                ? 'bg-emerald-500 border-emerald-500 text-gray-900'
-                : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400'
+                ? 'bg-black text-white'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
             "
           >
             {{ label }}
@@ -245,20 +245,20 @@ onMounted(() => {
       </div>
 
       <!-- Preview -->
-      <div v-if="totalPages > 0 && dailyPages > 0" class="bg-white rounded-2xl p-4 border border-gray-200">
-        <p class="text-xs text-gray-500 mb-2">스케줄 미리보기</p>
+      <div v-if="totalPages > 0 && dailyPages > 0" class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+        <p class="text-xs text-gray-400 mb-3">스케줄 미리보기</p>
         <div class="grid grid-cols-3 gap-3 text-center">
           <div>
-            <p class="text-xl font-bold text-emerald-600">{{ totalPages.toLocaleString() }}</p>
-            <p class="text-xs text-gray-400">총 쪽수</p>
+            <p class="text-xl font-bold text-black">{{ totalPages.toLocaleString() }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">총 쪽수</p>
           </div>
           <div>
-            <p class="text-xl font-bold text-emerald-600">{{ readingDays }}</p>
-            <p class="text-xs text-gray-400">읽는 날</p>
+            <p class="text-xl font-bold text-black">{{ readingDays }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">읽는 날</p>
           </div>
           <div>
-            <p class="text-xl font-bold text-emerald-600">{{ dailyPages }}</p>
-            <p class="text-xs text-gray-400">일일 쪽수</p>
+            <p class="text-xl font-bold text-black">{{ dailyPages }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">일일 쪽수</p>
           </div>
         </div>
       </div>
@@ -266,7 +266,7 @@ onMounted(() => {
       <button
         type="submit"
         :disabled="saving || selectedBooks.length === 0 || !form.end_date"
-        class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-gray-900 font-semibold py-3 rounded-xl transition-colors"
+        class="w-full bg-black hover:bg-gray-900 disabled:opacity-40 text-white font-medium py-3.5 rounded-full transition-colors text-sm"
       >
         {{ saving ? "생성 중..." : "세트 만들기" }}
       </button>

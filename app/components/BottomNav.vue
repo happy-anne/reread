@@ -5,7 +5,7 @@
       :key="item.to"
       :to="item.to"
       class="flex flex-col items-center gap-0.5 px-4 py-1 rounded-xl transition-colors"
-      :class="isActive(item.to) ? 'text-emerald-600' : 'text-gray-400 hover:text-gray-600'"
+      :class="isActive(item.to) ? 'text-black' : 'text-gray-400 hover:text-gray-600'"
     >
       <component :is="item.icon" class="w-5 h-5" />
       <span class="text-[10px] font-medium">{{ item.label }}</span>

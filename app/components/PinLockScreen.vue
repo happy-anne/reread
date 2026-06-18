@@ -38,16 +38,16 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[100] bg-gray-50 flex flex-col items-center justify-center px-6">
-    <h1 class="text-2xl font-extrabold text-emerald-600 mb-2">re:read</h1>
-    <p class="text-gray-500 text-sm mb-8">PIN을 입력하세요</p>
+  <div class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-6">
+    <h1 class="text-3xl font-bold text-black mb-2">re:read</h1>
+    <p class="text-gray-400 text-sm mb-8">PIN을 입력하세요</p>
 
     <div class="flex gap-4 mb-2" :class="{ 'animate-pulse': error }">
       <div
         v-for="(filled, i) in dots"
         :key="i"
         class="w-4 h-4 rounded-full border-2"
-        :class="filled ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'"
+        :class="filled ? 'bg-black border-black' : 'border-gray-200'"
       />
     </div>
     <p class="h-5 text-red-500 text-xs mb-6">{{ error ? "PIN이 일치하지 않아요" : "" }}</p>

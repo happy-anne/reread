@@ -1,7 +1,8 @@
 <script setup lang="ts">
 const props = defineProps<{
-  percent: number; // 0-100
+  percent: number;
   size?: number;
+  colorClass?: string;
 }>();
 
 const size = props.size ?? 120;
@@ -12,6 +13,8 @@ const offset = computed(() => {
   const clamped = Math.max(0, Math.min(100, props.percent));
   return circumference - (clamped / 100) * circumference;
 });
+
+const color = computed(() => props.colorClass ?? "text-emerald-600");
 </script>
 
 <template>
@@ -25,14 +28,14 @@ const offset = computed(() => {
         fill="none"
         stroke-width="10"
         stroke-linecap="round"
-        class="text-emerald-600 transition-all duration-500"
+        :class="[color, 'transition-all duration-500']"
         stroke="currentColor"
         :stroke-dasharray="circumference"
         :stroke-dashoffset="offset"
       />
     </svg>
     <div class="absolute inset-0 flex flex-col items-center justify-center">
-      <span class="text-xl font-bold text-emerald-600">{{ Math.round(percent) }}%</span>
+      <span class="text-xl font-bold" :class="color">{{ Math.round(percent) }}%</span>
     </div>
   </div>
 </template>

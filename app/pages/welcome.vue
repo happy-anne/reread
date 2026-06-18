@@ -25,7 +25,7 @@ onMounted(() => {
 <template>
   <div class="w-full max-w-sm text-center">
     <div class="mb-12">
-      <h1 class="text-5xl font-extrabold text-emerald-600 tracking-tight min-h-[3.5rem]">
+      <h1 class="text-5xl font-bold text-black tracking-tight min-h-[3.5rem]">
         {{ LOGO.slice(0, logoChars) }}<span v-if="logoChars < LOGO.length" class="animate-pulse opacity-60">|</span>
       </h1>
       <p class="text-gray-500 text-sm mt-2">Read again. With a plan.</p>
@@ -42,7 +42,7 @@ onMounted(() => {
     </div>
 
     <div class="mt-12 flex justify-center">
-      <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+      <div class="w-1.5 h-1.5 rounded-full bg-black animate-ping" />
     </div>
   </div>
 </template>

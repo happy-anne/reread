@@ -6,35 +6,30 @@ const props = defineProps<{
 const config = {
   pending: {
     ring: "stroke-emerald-600",
-    glow: "bg-emerald-900/20",
     fg: "text-emerald-600",
     label: "오늘의 독서",
     message: "오늘은 어떤 페이지를 만나게 될까요?",
   },
   completed: {
     ring: "stroke-emerald-500",
-    glow: "bg-emerald-100",
     fg: "text-emerald-600",
     label: "Completed",
     message: "대단해요! 오늘도 스스로와의 약속을 지켜냈어요.",
   },
   partial: {
     ring: "stroke-yellow-400",
-    glow: "bg-yellow-100",
     fg: "text-yellow-400",
     label: "Partial",
     message: "천천히 가도 괜찮아요. 오늘도 앞으로 나아갔어요.",
   },
   not_done: {
     ring: "stroke-slate-600",
-    glow: "bg-gray-200/10",
     fg: "text-gray-400",
     label: "Not started",
     message: "괜찮아요. 내일 다시 펼치면 그걸로 충분해요.",
   },
   passed: {
     ring: "stroke-sky-400",
-    glow: "bg-sky-100",
     fg: "text-sky-400",
     label: "Passed",
     message: "쉬어가는 하루도 독서 여정의 일부예요.",
@@ -45,9 +40,7 @@ const config = {
 <template>
   <div class="flex flex-col items-center justify-center">
     <div class="relative w-24 h-24 flex items-center justify-center">
-      <div class="absolute inset-0 rounded-full blur-xl" :class="config.glow" />
-
-      <svg viewBox="0 0 100 100" class="w-24 h-24 relative">
+      <svg viewBox="0 0 100 100" class="w-24 h-24">
         <circle cx="50" cy="50" r="44" fill="none" stroke="#e5e7eb" stroke-width="4" />
 
         <!-- Pending: open book with question mark -->
