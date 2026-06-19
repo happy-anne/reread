@@ -40,7 +40,7 @@ onMounted(fetchSets);
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-black">Sets</h1>
+      <h1 class="text-2xl font-bold text-black">세트</h1>
       <NuxtLink
         to="/sets/new"
         class="text-black leading-none"
@@ -57,7 +57,7 @@ onMounted(fetchSets);
       <p class="text-sm mt-1">세트를 만들어 회독 계획을 시작해보세요.</p>
     </div>
 
-    <div v-else class="space-y-3">
+    <div v-else class="space-y-2.5">
       <div
         v-for="set in sortedSets"
         :key="set.id"
@@ -81,7 +81,7 @@ onMounted(fetchSets);
           <span
             v-for="item in [...(set.items ?? [])].sort((a, b) => a.order_index - b.order_index)"
             :key="item.id"
-            class="bg-gray-50 rounded-full px-2.5 py-0.5 text-gray-500" style="font-size:14px"
+            class="rounded-full px-2.5 py-0.5 text-gray-500" style="font-size:14px;background:#F3F4F6"
           >
             {{ item.book?.title ?? "?" }}
           </span>

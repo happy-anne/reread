@@ -39,7 +39,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
 
 <template>
   <div class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center px-6">
-    <h1 class="mb-2"><AppLogo size="text-3xl" /></h1>
+    <h1 class="mb-2"><AppLogo size="2.0625rem" /></h1>
     <p class="text-gray-400 text-sm mb-8">PIN을 입력하세요</p>
 
     <div class="flex gap-4 mb-2" :class="{ 'animate-pulse': error }">
@@ -58,8 +58,7 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
         :key="n"
         data-circle
         @click="press(String(n))"
-        class="aspect-square rounded-full bg-white shadow-sm hover:bg-gray-100 text-xl font-semibold text-gray-900 transition-colors select-none"
-        style="touch-action:manipulation"
+        class="aspect-square rounded-full hover:bg-gray-200 font-semibold transition-colors select-none" style="background:#f7f8f8;font-size:28px;touch-action:manipulation"
       >
         {{ n }}
       </button>
@@ -67,16 +66,14 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
       <button
         data-circle
         @click="press('0')"
-        class="aspect-square rounded-full bg-white shadow-sm hover:bg-gray-100 text-xl font-semibold text-gray-900 transition-colors select-none"
-        style="touch-action:manipulation"
+        class="aspect-square rounded-full hover:bg-gray-200 font-semibold transition-colors select-none" style="background:#f7f8f8;font-size:28px;touch-action:manipulation"
       >
         0
       </button>
       <button
         data-circle
         @click="backspace"
-        class="aspect-square rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors select-none"
-        style="touch-action:manipulation"
+        class="aspect-square rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors select-none" style="font-size:28px;touch-action:manipulation"
       >
         ⌫
       </button>

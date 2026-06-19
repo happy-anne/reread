@@ -139,7 +139,7 @@ onMounted(() => {
       <h1 class="text-2xl font-bold text-black">새 읽기 세트</h1>
     </div>
 
-    <form @submit.prevent="save" class="space-y-3">
+    <form @submit.prevent="save" class="space-y-2.5">
       <!-- 세트 이름 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <label class="text-sm font-medium text-gray-700 block mb-1.5">세트 이름</label>
@@ -180,7 +180,8 @@ onMounted(() => {
             :key="book.id"
             type="button"
             @click="toggleBook(book)"
-            class="flex items-center gap-2 px-3 py-2 border text-sm transition-colors bg-white border-gray-100 text-gray-700 hover:border-gray-300"
+            :class="isSelected(book.id) ? 'bg-gray-100 text-black' : 'bg-white text-gray-700'"
+            class="flex items-center gap-2 px-3 py-2 border transition-colors" style="font-size:15px;border-color:rgba(0,0,0,0.1)"
           >
             <span class="font-medium">{{ book.title }}</span>
             <svg v-if="isSelected(book.id)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">

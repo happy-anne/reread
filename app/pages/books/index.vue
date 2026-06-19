@@ -24,7 +24,7 @@ onMounted(fetchBooks);
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-black">Books</h1>
+      <h1 class="text-2xl font-bold text-black">책</h1>
       <NuxtLink
         to="/books/new"
         class="text-black leading-none"
@@ -40,7 +40,7 @@ onMounted(fetchBooks);
       <p>아직 책이 없어요. 첫 번째 책을 추가해보세요!</p>
     </div>
 
-    <div v-else class="space-y-2">
+    <div v-else class="space-y-2.5">
       <div
         v-for="book in books"
         :key="book.id"

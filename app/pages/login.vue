@@ -26,7 +26,7 @@ async function login() {
 <template>
   <div class="w-full max-w-sm">
     <div class="mb-10 text-center">
-      <h1 class="mb-1"><AppLogo /></h1>
+      <h1 class="mb-1"><AppLogo size="44px" /></h1>
       <p class="text-gray-400 text-sm mt-2">Read again. With a plan.</p>
     </div>
 
@@ -59,7 +59,7 @@ async function login() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-black hover:bg-gray-900 disabled:opacity-50 text-white font-medium py-3.5 rounded-full text-sm transition-colors"
+          class="w-full bg-black hover:bg-gray-900 disabled:opacity-50 text-white font-medium py-3.5 text-sm transition-colors"
         >
           {{ loading ? "로그인 중..." : "로그인" }}
         </button>

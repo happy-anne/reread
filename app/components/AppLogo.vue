@@ -1,9 +1,10 @@
 <script setup lang="ts">
-defineProps<{ size?: string }>();
+const props = defineProps<{ size?: string }>();
+const fontSize = computed(() => props.size ?? '3.1875rem');
 </script>
 
 <template>
-  <span :class="size ?? 'text-5xl'" class="font-bold" style="letter-spacing:0">
-    <span class="text-black">re</span><span style="color:#3182f6">:</span><span class="text-black">read</span>
+  <span class="font-bold" :style="{ fontSize, letterSpacing: '0' }">
+    <span class="text-black">re</span><span style="color:#a6aeba">:</span><span class="text-black">read</span>
   </span>
 </template>

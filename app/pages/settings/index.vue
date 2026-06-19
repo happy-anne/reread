@@ -130,9 +130,9 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 
 <template>
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
-    <h1 class="text-2xl font-bold text-black mb-6">Settings</h1>
+    <h1 class="text-2xl font-bold text-black mb-6">설정</h1>
 
-    <div class="space-y-3">
+    <div class="space-y-2.5">
       <!-- Notification -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <h2 class="font-semibold text-black mb-3">알림</h2>
@@ -245,7 +245,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
               :key="n"
               data-circle
               @click="pressPinDigit(String(n))"
-              class="aspect-square rounded-full bg-gray-100 hover:bg-gray-200 text-lg font-semibold text-black transition-colors"
+              class="aspect-square rounded-full hover:bg-gray-200 font-semibold transition-colors" style="background:#f7f8f8;font-size:28px"
             >
               {{ n }}
             </button>
@@ -253,14 +253,14 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             <button
               data-circle
               @click="pressPinDigit('0')"
-              class="aspect-square rounded-full bg-gray-100 hover:bg-gray-200 text-lg font-semibold text-black transition-colors"
+              class="aspect-square rounded-full hover:bg-gray-200 font-semibold transition-colors" style="background:#f7f8f8;font-size:28px"
             >
               0
             </button>
             <button
               data-circle
               @click="backspacePinDigit"
-              class="aspect-square rounded-full flex items-center justify-center text-gray-400 hover:text-black transition-colors"
+              class="aspect-square rounded-full flex items-center justify-center text-gray-400 hover:text-black transition-colors" style="font-size:28px"
             >
               ⌫
             </button>

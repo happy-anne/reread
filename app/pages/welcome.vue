@@ -27,7 +27,7 @@ onMounted(() => {
     <div class="mb-12">
       <h1 class="text-5xl font-bold tracking-tight min-h-[3.5rem]">
         <span class="text-black">{{ "re".slice(0, Math.min(logoChars, 2)) }}</span>
-        <span v-if="logoChars > 2" style="color:#3182f6">:</span>
+        <span v-if="logoChars > 2" style="color:#a6aeba">:</span>
         <span class="text-black">{{ "read".slice(0, Math.max(0, logoChars - 3)) }}</span>
         <span v-if="logoChars < LOGO.length" class="animate-pulse opacity-40 text-black">|</span>
       </h1>

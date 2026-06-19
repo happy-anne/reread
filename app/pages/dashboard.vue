@@ -100,9 +100,24 @@ function determineStatus(target_end: number, actual: number): ReadingLog["status
   return "partial";
 }
 
+async function cancelLog(setId: string) {
+  const existing = getLog(setId);
+  if (!existing) return;
+  await supabase.from("reading_logs").delete().eq("id", existing.id);
+  await fetchData();
+}
+
 async function saveProgress(setId: string, schedule: DailySchedule, actual: number) {
   if (!user.value) return;
   saving.value[setId] = true;
+
+  const existing = getLog(setId);
+  if (existing && existing.actual_page === actual) {
+    await supabase.from("reading_logs").delete().eq("id", existing.id);
+    await fetchData();
+    saving.value[setId] = false;
+    return;
+  }
 
   const status = determineStatus(schedule.end_page, actual);
   const payload = {
@@ -117,7 +132,6 @@ async function saveProgress(setId: string, schedule: DailySchedule, actual: numb
     status,
   };
 
-  const existing = getLog(setId);
   if (existing) {
     await supabase.from("reading_logs").update(payload).eq("id", existing.id);
   } else {
@@ -132,6 +146,14 @@ async function markPassed(setId: string, schedule: DailySchedule) {
   if (!user.value) return;
   saving.value[setId] = true;
 
+  const existing = getLog(setId);
+  if (existing && existing.status === "passed") {
+    await supabase.from("reading_logs").delete().eq("id", existing.id);
+    await fetchData();
+    saving.value[setId] = false;
+    return;
+  }
+
   const payload = {
     user_id: user.value.id,
     set_id: setId,
@@ -144,7 +166,6 @@ async function markPassed(setId: string, schedule: DailySchedule) {
     status: "passed" as const,
   };
 
-  const existing = getLog(setId);
   if (existing) {
     await supabase.from("reading_logs").update(payload).eq("id", existing.id);
   } else {
@@ -162,7 +183,7 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <!-- Brand header -->
     <div class="text-center mb-8">
-      <h1 class="mb-1"><AppLogo size="text-4xl" /></h1>
+      <h1 class="mb-1"><AppLogo size="32px" /></h1>
       <p class="text-gray-400 text-xs mt-1">Read again. With a plan.</p>
     </div>
 
@@ -211,9 +232,9 @@ onMounted(fetchData);
             :class="
               getLog(set_id)?.actual_page === p
                 ? 'text-white font-bold'
-                : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-100'
+                : 'bg-white hover:bg-gray-100 text-gray-800 border'
             "
-            :style="getLog(set_id)?.actual_page === p ? 'background-color:#000;min-width:35px' : 'min-width:35px'"
+            :style="getLog(set_id)?.actual_page === p ? 'background-color:#000;min-width:35px' : 'min-width:35px;border-color:rgba(0,0,0,0.1)'"
           >
             {{ p }}
           </button>
@@ -224,7 +245,7 @@ onMounted(fetchData);
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
             placeholder="직접"
-            class="w-16 text-center bg-white border border-gray-200 px-2 py-1.5 outline-none focus:border-gray-400" style="font-size:14px"
+            class="w-16 text-center bg-white border px-2 py-1.5 outline-none focus:border-gray-400" style="font-size:14px;border-color:rgba(0,0,0,0.1)"
           />
           <button
             v-if="pageInput[set_id]"
