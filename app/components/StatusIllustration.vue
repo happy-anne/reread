@@ -4,90 +4,72 @@ const props = defineProps<{
 }>();
 
 const config = {
-  pending: {
-    ring: "stroke-emerald-600",
-    fg: "text-emerald-600",
-    label: "오늘의 독서",
-    message: "오늘은 어떤 페이지를 만나게 될까요?",
-  },
   completed: {
-    ring: "stroke-emerald-500",
-    fg: "text-emerald-600",
-    label: "Completed",
+    color: "#22C55E",
+    label: "완료했어요",
     message: "대단해요! 오늘도 스스로와의 약속을 지켜냈어요.",
   },
   partial: {
-    ring: "stroke-yellow-400",
-    fg: "text-yellow-400",
-    label: "Partial",
+    color: "#FFA72C",
+    label: "일부분 읽었어요",
     message: "천천히 가도 괜찮아요. 오늘도 앞으로 나아갔어요.",
   },
   not_done: {
-    ring: "stroke-slate-600",
-    fg: "text-gray-400",
-    label: "Not started",
+    color: "#DDDDDD",
+    label: "아직 읽지 않았어요",
     message: "괜찮아요. 내일 다시 펼치면 그걸로 충분해요.",
   },
   passed: {
-    ring: "stroke-sky-400",
-    fg: "text-sky-400",
-    label: "Passed",
+    color: "#666666",
+    label: "패스했어요",
     message: "쉬어가는 하루도 독서 여정의 일부예요.",
   },
+  pending: {
+    color: "#DDDDDD",
+    label: "아직 읽지 않았어요",
+    message: "괜찮아요. 내일 다시 펼치면 그걸로 충분해요.",
+  },
 }[props.status];
+
+const effectiveStatus = computed(() =>
+  props.status === "pending" ? "not_done" : props.status
+);
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center">
-    <div class="relative w-24 h-24 flex items-center justify-center">
-      <svg viewBox="0 0 100 100" class="w-24 h-24">
-        <circle cx="50" cy="50" r="44" fill="none" stroke="#e5e7eb" stroke-width="4" />
+    <div style="width:80px;height:80px">
 
-        <!-- Pending: open book with question mark -->
-        <g v-if="status === 'pending'">
-          <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="3" stroke-dasharray="8 4" />
-          <path d="M32 42 Q50 34 50 42 Q50 34 68 42 L68 64 Q50 56 50 64 Q50 56 32 64 Z"
-                fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-700" stroke-linejoin="round" />
-          <line x1="50" y1="42" x2="50" y2="64" stroke="currentColor" stroke-width="2.5" class="text-emerald-700" />
-          <text x="50" y="54" text-anchor="middle" font-size="14" font-weight="bold" class="fill-emerald-500">?</text>
-        </g>
-
-        <!-- Completed: open book with checkmark -->
-        <g v-else-if="status === 'completed'">
-          <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="4" />
-          <path d="M32 42 Q50 34 50 42 Q50 34 68 42 L68 64 Q50 56 50 64 Q50 56 32 64 Z"
-                fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600" stroke-linejoin="round" />
-          <path d="M40 50 L48 58 L62 44" fill="none" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round" stroke-linejoin="round" class="text-emerald-600" />
-        </g>
-
-        <!-- Partial: half-filled book -->
-        <g v-else-if="status === 'partial'">
-          <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="4"
-                  stroke-dasharray="138" stroke-dashoffset="69" stroke-linecap="round" transform="rotate(-90 50 50)" />
-          <path d="M32 42 Q50 34 50 42 Q50 34 68 42 L68 64 Q50 56 50 64 Q50 56 32 64 Z"
-                fill="none" stroke="currentColor" stroke-width="2.5" class="text-yellow-300" stroke-linejoin="round" />
-          <line x1="50" y1="42" x2="50" y2="64" stroke="currentColor" stroke-width="2.5" class="text-yellow-400" />
-        </g>
-
-        <!-- Not done: empty/closed book -->
-        <g v-else-if="status === 'not_done'">
-          <rect x="36" y="36" width="28" height="28" rx="3" fill="none" stroke="currentColor"
-                stroke-width="2.5" class="text-gray-300" />
-          <line x1="50" y1="36" x2="50" y2="64" stroke="currentColor" stroke-width="2" class="text-gray-300" />
-        </g>
-
-        <!-- Passed: forward/skip arrow -->
-        <g v-else-if="status === 'passed'">
-          <circle cx="50" cy="50" r="44" fill="none" :class="config.ring" stroke-width="4" stroke-dasharray="6 6" />
-          <path d="M40 36 L58 50 L40 64" fill="none" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round" stroke-linejoin="round" class="text-sky-400" />
-          <line x1="62" y1="36" x2="62" y2="64" stroke="currentColor" stroke-width="3.5"
-                stroke-linecap="round" class="text-sky-400" />
-        </g>
+      <!-- completed: 초록 원 + 체크마크 -->
+      <svg v-if="effectiveStatus === 'completed'" viewBox="0 0 179 179" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="179" height="179" rx="89.5" fill="#22C55E"/>
+        <path d="M118.479 66C119.282 66 120.051 66.3237 120.617 66.8975C121.183 67.4712 121.5 68.2482 121.5 69.0566C121.5 69.8651 121.183 70.642 120.617 71.2158L80.2998 112.102C80.0197 112.386 79.6864 112.612 79.3193 112.767C78.9522 112.921 78.558 113 78.1602 113C77.7626 113 77.3689 112.921 77.002 112.767C76.7267 112.651 76.4703 112.494 76.2412 112.304L76.0215 112.102L58.3828 94.2139C57.817 93.6401 57.5 92.8632 57.5 92.0547C57.5001 91.2464 57.8171 90.4702 58.3828 89.8965C58.9489 89.3225 59.7179 88.998 60.5215 88.998C61.325 88.9981 62.0942 89.3225 62.6602 89.8965L78.1602 105.617L116.34 66.8975C116.906 66.3236 117.675 66.0001 118.479 66Z" fill="white" stroke="white"/>
       </svg>
+
+      <!-- partial: 주황 원 + 반원 진행 아이콘 -->
+      <svg v-else-if="effectiveStatus === 'partial'" viewBox="0 0 179 179" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="179" height="179" rx="89.5" fill="#FFA72C"/>
+        <path d="M89.502 57.8203C106.969 57.8203 121.182 72.0325 121.182 89.5C121.182 106.968 106.97 121.181 89.502 121.181C87.8625 121.181 86.5322 119.849 86.5322 118.21C86.5324 116.571 87.8626 115.24 89.502 115.24C103.695 115.24 115.242 103.693 115.242 89.5C115.242 75.3075 103.695 63.7598 89.502 63.7598C87.8625 63.7598 86.5322 62.4295 86.5322 60.79C86.5323 59.1507 87.8626 57.8203 89.502 57.8203ZM75.7773 114.888C76.407 113.371 78.1407 112.651 79.6572 113.28C81.1739 113.906 81.8953 115.644 81.2656 117.161C80.6359 118.678 78.9014 119.398 77.3848 118.769C75.8681 118.139 75.1477 116.404 75.7773 114.888ZM67.1035 107.703C68.2638 106.543 70.1454 106.543 71.3057 107.703C72.4655 108.863 72.4656 110.744 71.3057 111.904C70.1454 113.065 68.2638 113.065 67.1035 111.904C65.9434 110.744 65.9436 108.863 67.1035 107.703ZM61.8369 97.7471C63.3536 97.1215 65.0921 97.8388 65.7178 99.3555C66.3432 100.872 65.6268 102.607 64.1104 103.236C62.5937 103.862 60.8591 103.145 60.2295 101.628C59.6038 100.111 60.3202 98.3767 61.8369 97.7471ZM100.021 76.792C101.023 75.4931 102.897 75.2599 104.188 76.2578C105.486 77.2596 105.724 79.124 104.723 80.4229L104.719 80.4268L87.8887 102.207C87.3502 102.904 86.5304 103.328 85.6514 103.359H85.54C84.6966 103.359 83.8963 103.004 83.3301 102.378L74.4209 92.4775C73.324 91.2539 73.4229 89.3772 74.6426 88.2803C75.8662 87.1873 77.7429 87.2823 78.8398 88.502L85.3662 95.7568L100.021 76.792ZM60.79 86.5303C62.4303 86.5303 63.7598 87.8597 63.7598 89.5C63.7596 91.1402 62.4303 92.4697 60.79 92.4697C59.1499 92.4696 57.8204 91.1401 57.8203 89.5C57.8203 87.8598 59.1498 86.5304 60.79 86.5303ZM60.2305 77.376C60.8601 75.8593 62.5947 75.139 64.1113 75.7686C65.628 76.3982 66.3494 78.1327 65.7197 79.6494C65.0901 81.1659 63.3554 81.8863 61.8389 81.2568C60.3222 80.6272 59.6009 78.8926 60.2305 77.376ZM67.1035 67.0977C68.2638 65.9374 70.1454 65.9374 71.3057 67.0977C72.4655 68.2579 72.4656 70.1387 71.3057 71.2988C70.1454 72.4591 68.2638 72.4591 67.1035 71.2988C65.9434 70.1386 65.9436 68.2579 67.1035 67.0977ZM77.3828 60.2354C78.8995 59.6097 80.634 60.3301 81.2637 61.8428C81.8893 63.3594 81.1728 65.0979 79.6562 65.7236C78.1397 66.3493 76.4012 65.6326 75.7754 64.1162C75.1497 62.5996 75.8663 60.8611 77.3828 60.2354Z" fill="white"/>
+      </svg>
+
+      <!-- not_done / pending: 회색 원 + 세 점 -->
+      <svg v-else-if="effectiveStatus === 'not_done'" viewBox="0 0 179 179" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="179" height="179" rx="89.5" fill="#DDDDDD"/>
+        <rect x="60" y="83" width="13" height="13" rx="6.5" fill="white"/>
+        <rect x="83" y="83" width="13" height="13" rx="6.5" fill="white"/>
+        <rect x="106" y="83" width="13" height="13" rx="6.5" fill="white"/>
+      </svg>
+
+      <!-- passed: 어두운 회색 원 + 스킵 아이콘 -->
+      <svg v-else-if="effectiveStatus === 'passed'" viewBox="0 0 179 179" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="179" height="179" rx="89.5" fill="#666666"/>
+        <path d="M66.2715 60.873C67.1705 59.974 68.6253 59.9741 69.5244 60.873L96.5244 87.873C97.4235 88.7721 97.4235 90.2269 96.5244 91.126L69.5244 118.126C69.0762 118.574 68.4866 118.8 67.8984 118.8C67.3101 118.8 66.7198 118.574 66.2715 118.126V118.125C65.3727 117.227 65.373 115.771 66.2715 114.873L91.6445 89.499L66.2715 64.126C65.3726 63.2269 65.3725 61.7721 66.2715 60.873Z" fill="white" stroke="white"/>
+        <rect x="108.797" y="57.5" width="4.6" height="64" fill="white" stroke="white"/>
+      </svg>
+
     </div>
-    <p class="text-sm font-medium mt-2" :class="config.fg">{{ config.label }}</p>
-    <p class="text-xs text-gray-500 mt-1 text-center px-4 leading-relaxed">{{ config.message }}</p>
+
+    <p class="text-sm font-semibold mt-3" :style="{ color: config.color === '#DDDDDD' ? '#999' : config.color }">{{ config.label }}</p>
+    <!-- <p class="text-xs text-gray-400 mt-1 text-center px-4 leading-relaxed">{{ config.message }}</p> -->
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ReadingSet, ReadingSetItem, ReadingLog, DailySchedule } from "~/types";
-import { computeLiveSchedule } from "~/composables/useScheduler";
+import { computeLiveSchedule, calcTotalPages } from "~/composables/useScheduler";
 import { getSetColor } from "~/composables/useSetColor";
 
 const supabase = useSupabaseClient();
@@ -80,9 +80,18 @@ function getLog(setId: string) {
   return allLogs.value.find((l) => l.set_id === setId && l.log_date === today);
 }
 
+function getSetPercent(setId: string): number {
+  const set = activeSets.value.find((s) => s.id === setId);
+  if (!set) return 0;
+  const setLogs = allLogs.value.filter((l) => l.set_id === setId && l.actual_page != null);
+  const pagesRead = setLogs.reduce((sum, l) => sum + (l.actual_page! - l.target_start_page + 1), 0);
+  const total = calcTotalPages(set.items ?? [], set.reread_count);
+  return total > 0 ? Math.min(100, Math.round((pagesRead / total) * 100)) : 0;
+}
+
 function getStatus(setId: string) {
   const log = getLog(setId);
-  if (!log) return "pending";
+  if (!log) return "not_done";
   return log.status;
 }
 
@@ -173,14 +182,15 @@ onMounted(fetchData);
         :key="set_id"
         class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100"
       >
-        <!-- Set name + color dot + round -->
+        <!-- Set name + round + percent -->
         <div class="flex items-center justify-center gap-2 mb-4">
-          <span
+          <!-- <span
             class="w-2.5 h-2.5 rounded-full flex-shrink-0"
             :style="{ backgroundColor: getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').hex }"
-          />
+          /> -->
           <p class="text-xs text-gray-400 font-medium">
             {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
+            <span class="ml-1 text-gray-300">{{ getSetPercent(set_id) }}%</span>
           </p>
         </div>
 
@@ -188,22 +198,22 @@ onMounted(fetchData);
         <StatusIllustration :status="getStatus(set_id)" />
 
         <!-- Book -->
-        <h2 class="text-center text-lg font-semibold mt-4 mb-6">{{ schedule.book_title }}</h2>
+        <h2 class="text-center text-lg font-semibold mt-4 mb-3">{{ schedule.book_title }}</h2>
 
-        <!-- Page buttons + inline direct input -->
-        <div class="flex flex-wrap justify-center gap-2">
+        <!-- Page buttons + direct input + pass -->
+        <div class="flex flex-wrap justify-center gap-1.5">
           <button
             v-for="p in range(schedule.start_page, schedule.end_page)"
             :key="p"
             @click="saveProgress(set_id, schedule, p)"
             :disabled="saving[set_id]"
-            class="px-3 py-1.5 rounded-full text-sm font-mono transition-colors"
+            class="px-3 py-1.5 text-xs font-mono transition-colors"
             :class="
               getLog(set_id)?.actual_page === p
                 ? 'text-white font-bold'
                 : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-100'
             "
-            :style="getLog(set_id)?.actual_page === p ? 'background-color:#0000ee' : ''"
+            :style="getLog(set_id)?.actual_page === p ? 'background-color:#000;min-width:35px' : 'min-width:35px'"
           >
             {{ p }}
           </button>
@@ -214,27 +224,28 @@ onMounted(fetchData);
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
             placeholder="직접"
-            class="w-16 text-center bg-white border border-gray-200 rounded-full px-2 py-1.5 outline-none focus:border-gray-400"
+            class="w-16 text-center bg-white border border-gray-200 px-2 py-1.5 outline-none focus:border-gray-400" style="font-size:14px"
           />
           <button
             v-if="pageInput[set_id]"
             @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
             :disabled="saving[set_id]"
-            class="disabled:opacity-40 text-white font-medium px-4 py-1.5 rounded-full text-sm transition-colors"
-            style="background-color:#0000ee"
+            class="disabled:opacity-40 text-white font-medium px-4 py-1.5 text-sm transition-colors"
+            style="background-color:#000"
           >
             저장
           </button>
-        </div>
 
-        <!-- Pass button -->
-        <button
-          @click="markPassed(set_id, schedule)"
-          :disabled="saving[set_id]"
-          class="mt-3 w-full text-gray-400 hover:text-gray-600 text-sm py-1 transition-colors"
-        >
-          오늘 패스
-        </button>
+          <!-- 패스 버튼 — 숫자 버튼과 동일한 스타일 -->
+          <button
+            @click="markPassed(set_id, schedule)"
+            :disabled="saving[set_id]"
+            class="px-3 py-1.5 text-xs font-mono transition-colors bg-white hover:bg-gray-100 text-gray-400 border border-gray-100"
+            style="min-width:35px"
+          >
+            패스
+          </button>
+        </div>
       </div>
     </div>
   </div>

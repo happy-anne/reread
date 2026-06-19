@@ -56,21 +56,27 @@ onUnmounted(() => window.removeEventListener("keydown", onKeydown));
       <button
         v-for="n in [1,2,3,4,5,6,7,8,9]"
         :key="n"
+        data-circle
         @click="press(String(n))"
-        class="aspect-square rounded-full bg-white shadow-sm hover:bg-gray-100 text-xl font-semibold text-gray-900 transition-colors"
+        class="aspect-square rounded-full bg-white shadow-sm hover:bg-gray-100 text-xl font-semibold text-gray-900 transition-colors select-none"
+        style="touch-action:manipulation"
       >
         {{ n }}
       </button>
       <div />
       <button
+        data-circle
         @click="press('0')"
-        class="aspect-square rounded-full bg-white shadow-sm hover:bg-gray-100 text-xl font-semibold text-gray-900 transition-colors"
+        class="aspect-square rounded-full bg-white shadow-sm hover:bg-gray-100 text-xl font-semibold text-gray-900 transition-colors select-none"
+        style="touch-action:manipulation"
       >
         0
       </button>
       <button
+        data-circle
         @click="backspace"
-        class="aspect-square rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors"
+        class="aspect-square rounded-full flex items-center justify-center text-gray-500 hover:text-gray-800 transition-colors select-none"
+        style="touch-action:manipulation"
       >
         ⌫
       </button>

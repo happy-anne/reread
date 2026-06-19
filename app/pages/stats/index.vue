@@ -13,6 +13,7 @@ const sets = ref<(ReadingSet & { items: ReadingSetItem[] })[]>([]);
 const selectedSetId = ref<string>("");
 
 const now = new Date();
+const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 const currentMonth = ref(
   `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
 );
@@ -34,7 +35,6 @@ const monthDisplay = computed(() => {
   return `${y}년 ${m}월`;
 });
 
-// 달력은 선택된 세트의 로그만 표시
 const filteredMonthLogs = computed(() => {
   if (!selectedSetId.value) return monthLogs.value;
   return monthLogs.value.filter((l) => l.set_id === selectedSetId.value);
@@ -80,8 +80,7 @@ const stats = computed(() => {
     } else break;
   }
 
-  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const completedSets = sets.value.filter((s) => s.end_date < today).length;
+  const completedSets = sets.value.filter((s) => s.end_date < todayStr).length;
 
   return { completed, totalLogged, totalPages, streak, completedSets };
 });
@@ -109,7 +108,6 @@ watch(selectableSets, (list) => {
   if (!selectedSetId.value && list.length > 0) selectedSetId.value = list[0]!.id;
 });
 
-// 세트 변경 시 달력 월별 로그 다시 필터링 (이미 filteredMonthLogs에서 처리)
 watch(selectedSetId, () => {
   fetchMonthLogs();
 });
@@ -165,11 +163,11 @@ onMounted(fetchAll);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <h1 class="text-2xl font-bold mb-6">Stats</h1>
 
-    <!-- Set selector (분리된 상단 카드) -->
+    <!-- Set selector -->
     <div v-if="selectableSets.length > 0" class="bg-white rounded-2xl p-4 border border-gray-100 mb-4">
       <select
         v-model="selectedSetId"
-        class="w-full bg-gray-100 rounded-xl px-3 py-2 text-sm outline-none focus:bg-gray-200 transition-colors"
+        class="w-full px-3 py-2 text-sm outline-none transition-colors" style="background:#FFF"
       >
         <option v-for="set in selectableSets" :key="set.id" :value="set.id">
           {{ set.name }}{{ set.is_active ? "" : " (일시중지)" }}
@@ -190,7 +188,7 @@ onMounted(fetchAll);
             <div class="flex items-center gap-2 min-w-0">
               <span class="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 :class="getSetColor(sets.find(s=>s.id===selectedSetId)?.color??'').dot" />
-              <p class="font-semibold text-black truncate">{{ selectedSetProgress.name }}</p>
+              <p class="font-semibold text-black truncate text-lg">{{ selectedSetProgress.name }}</p>
             </div>
             <NuxtLink
               :to="`/sets/${selectedSetId}/edit`"
@@ -200,32 +198,33 @@ onMounted(fetchAll);
               <PencilIcon class="w-4 h-4" />
             </NuxtLink>
           </div>
-          <p class="text-sm mt-1" :class="getSetColor(sets.find(s=>s.id===selectedSetId)?.color??'').accent">
+          <p class="text-sm mt-0.5" style="color:#999">전체 {{ sets.length }}세트</p>
+          <p class="text-sm mt-0.5" style="color:#999">
             {{ selectedSetProgress.pagesRead.toLocaleString() }} / {{ selectedSetProgress.totalPages.toLocaleString() }}쪽
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Stats cards (가로 한 줄) -->
+    <!-- Stats cards -->
     <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
       <div class="bg-white rounded-2xl p-3 border border-gray-100 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-black">{{ stats.streak }}</p>
-        <p class="text-xs text-gray-400 mt-0.5">연속 일수</p>
+        <p class="text-lg font-bold text-black">{{ stats.streak }}</p>
+        <p class="text-[13px] text-gray-400 mt-0.5">연속 일수</p>
       </div>
       <div class="bg-white rounded-2xl p-3 border border-gray-100 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-black">{{ stats.totalPages.toLocaleString() }}</p>
-        <p class="text-xs text-gray-400 mt-0.5">총 읽은 쪽</p>
+        <p class="text-lg font-bold text-black">{{ stats.totalPages.toLocaleString() }}</p>
+        <p class="text-[13px] text-gray-400 mt-0.5">총 읽은 쪽</p>
       </div>
       <div class="bg-white rounded-2xl p-3 border border-gray-100 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-black">
+        <p class="text-lg font-bold text-black">
           {{ stats.totalLogged > 0 ? Math.round((stats.completed / stats.totalLogged) * 100) : 0 }}%
         </p>
-        <p class="text-xs text-gray-400 mt-0.5">완료율</p>
+        <p class="text-[13px] text-gray-400 mt-0.5">완료율</p>
       </div>
       <div class="bg-white rounded-2xl p-3 border border-gray-100 text-center flex-1 min-w-[72px]">
-        <p class="text-xl font-bold text-black">{{ stats.completedSets }}</p>
-        <p class="text-xs text-gray-400 mt-0.5">끝난 세트</p>
+        <p class="text-lg font-bold text-black">{{ stats.completedSets }}</p>
+        <p class="text-[13px] text-gray-400 mt-0.5">끝난 세트</p>
       </div>
     </div>
 
@@ -247,14 +246,14 @@ onMounted(fetchAll);
         <div
           v-for="(day, i) in calendarDays"
           :key="i"
-          class="aspect-square flex flex-col items-center justify-center rounded-lg text-xs"
-          :class="day.date ? 'bg-gray-100' : ''"
+          class="aspect-square flex flex-col items-center justify-start rounded-lg text-xs pt-1"
+          :class="day.date === todayStr ? 'bg-gray-100' : ''"
         >
           <template v-if="day.date">
-            <span class="text-gray-500">{{ parseInt(day.date.slice(-2)) }}</span>
+            <span class="text-gray-500 leading-none">{{ parseInt(day.date.slice(-2)) }}</span>
             <span
               v-if="day.log"
-              class="mt-0.5 rounded-full flex-shrink-0"
+              class="mt-1.5 rounded-full flex-shrink-0"
               style="width:8px;height:8px;display:inline-block"
               :style="{ backgroundColor: statusColor[day.log.status] }"
             />

@@ -6,7 +6,15 @@ const notificationTime = ref("21:00");
 const restDays = ref<number[]>([]);
 const saving = ref(false);
 const savedMsg = ref(false);
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+
+const originalRestDays = ref<number[]>([]);
+const originalTime = ref("21:00");
+const hasChanges = computed(
+  () =>
+    notificationTime.value !== originalTime.value ||
+    JSON.stringify([...restDays.value].sort()) !== JSON.stringify([...originalRestDays.value].sort())
+);
 
 const daysRemaining = ref<number | null>(null);
 
@@ -28,6 +36,8 @@ async function fetchSettings() {
   if (data) {
     notificationTime.value = data.notification_time ?? "21:00";
     restDays.value = data.rest_days ?? [];
+    originalTime.value = notificationTime.value;
+    originalRestDays.value = [...restDays.value];
   }
 }
 
@@ -48,6 +58,8 @@ async function saveSettings() {
   }, { onConflict: "user_id" });
   saving.value = false;
   savedMsg.value = true;
+  originalTime.value = notificationTime.value;
+  originalRestDays.value = [...restDays.value];
   setTimeout(() => (savedMsg.value = false), 2000);
 }
 
@@ -138,7 +150,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <h2 class="font-semibold text-black mb-1">기본 쉬는 날</h2>
         <p class="text-gray-400 text-xs mb-3">새 읽기 세트에 기본 적용돼요. 각 세트에서 변경할 수 있어요.</p>
-        <div class="flex gap-1.5">
+        <div class="flex gap-1.5 mb-4">
           <button
             v-for="(label, idx) in DAY_LABELS"
             :key="idx"
@@ -151,15 +163,15 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             {{ label }}
           </button>
         </div>
+        <button
+          @click="saveSettings"
+          :disabled="saving"
+          class="w-full font-medium py-3 rounded-full text-sm transition-colors"
+          :class="hasChanges ? 'bg-black hover:bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 cursor-default'"
+        >
+          {{ saving ? "저장 중..." : savedMsg ? "저장됨!" : "설정 저장" }}
+        </button>
       </div>
-
-      <button
-        @click="saveSettings"
-        :disabled="saving"
-        class="w-full bg-black hover:bg-gray-900 disabled:opacity-40 text-white font-medium py-3.5 rounded-full text-sm transition-colors"
-      >
-        {{ saving ? "저장 중..." : savedMsg ? "저장됨!" : "설정 저장" }}
-      </button>
 
       <!-- Security -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
@@ -183,7 +195,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
           </button>
           <button
             @click="disablePin"
-            class="flex-1 bg-gray-100 hover:bg-red-50 text-red-400 hover:text-red-500 font-medium py-3 rounded-full text-sm transition-colors"
+            class="flex-1 bg-gray-100 hover:bg-gray-200 text-black font-medium py-3 rounded-full text-sm transition-colors"
           >
             PIN 해제
           </button>
@@ -199,7 +211,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
         </p>
         <button
           @click="signOut"
-          class="w-full bg-gray-100 hover:bg-red-50 text-red-400 hover:text-red-500 font-medium py-3 rounded-full text-sm transition-colors"
+          class="w-full bg-gray-100 hover:bg-gray-200 text-black font-medium py-3 rounded-full text-sm transition-colors"
         >
           로그아웃
         </button>
@@ -208,7 +220,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 
     <!-- PIN setup modal -->
     <Teleport to="body">
-      <div v-if="showPinModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+      <div v-if="showPinModal" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
         <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-xl">
           <h2 class="text-lg font-bold text-black mb-1">{{ pinStep === "enter" ? "새 PIN 입력" : "PIN 확인" }}</h2>
           <p class="text-gray-400 text-xs mb-5">4자리 숫자를 입력해주세요</p>
@@ -231,6 +243,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             <button
               v-for="n in [1,2,3,4,5,6,7,8,9]"
               :key="n"
+              data-circle
               @click="pressPinDigit(String(n))"
               class="aspect-square rounded-full bg-gray-100 hover:bg-gray-200 text-lg font-semibold text-black transition-colors"
             >
@@ -238,12 +251,14 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             </button>
             <div />
             <button
+              data-circle
               @click="pressPinDigit('0')"
               class="aspect-square rounded-full bg-gray-100 hover:bg-gray-200 text-lg font-semibold text-black transition-colors"
             >
               0
             </button>
             <button
+              data-circle
               @click="backspacePinDigit"
               class="aspect-square rounded-full flex items-center justify-center text-gray-400 hover:text-black transition-colors"
             >

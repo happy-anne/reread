@@ -47,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white text-gray-900 flex flex-col">
+  <div class="min-h-screen bg-[#f7f8f8] text-gray-900 flex flex-col">
     <main class="flex-1 pb-20">
       <slot />
     </main>

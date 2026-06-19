@@ -39,6 +39,7 @@ async function login() {
           required
           class="w-full bg-gray-100 rounded-xl px-4 py-3 outline-none focus:bg-gray-200 transition-colors"
           placeholder="you@example.com"
+          autocomplete="email"
         />
       </div>
       <div>

@@ -14,6 +14,7 @@ const books = ref<Book[]>([]);
 const saving = ref(false);
 const loading = ref(true);
 const currentSet = ref<ReadingSet | null>(null);
+const showDeleteConfirm = ref(false);
 
 const form = reactive({
   name: "",
@@ -21,11 +22,29 @@ const form = reactive({
   start_date: "",
   end_date: "",
   rest_days: [] as number[],
-  color: "emerald",
+  color: "rose",
 });
 
 const selectedBooks = ref<{ book: Book; temp_id: string }[]>([]);
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const originalBookIds = ref<string[]>([]);
+const originalForm = reactive({ name: "", reread_count: 2, start_date: "", end_date: "", rest_days: [] as number[], color: "rose" });
+const DAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+
+const hasChanges = computed(() => {
+  if (form.name !== originalForm.name) return true;
+  if (form.reread_count !== originalForm.reread_count) return true;
+  if (form.start_date !== originalForm.start_date) return true;
+  if (form.end_date !== originalForm.end_date) return true;
+  if (form.color !== originalForm.color) return true;
+  if (JSON.stringify([...form.rest_days].sort()) !== JSON.stringify([...originalForm.rest_days].sort())) return true;
+  const currentIds = selectedBooks.value.map(s => s.book.id);
+  if (JSON.stringify(currentIds) !== JSON.stringify(originalBookIds.value)) return true;
+  return false;
+});
+
+function toLocalDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 async function fetchData() {
   if (!user.value) return;
@@ -50,12 +69,14 @@ async function fetchData() {
     form.start_date = s.start_date;
     form.end_date = s.end_date;
     form.rest_days = s.rest_days ?? [];
-    form.color = s.color ?? "emerald";
+    form.color = s.color ?? "rose";
 
     selectedBooks.value = [...(s.items ?? [])]
       .sort((a, b) => a.order_index - b.order_index)
       .filter((item) => item.book)
       .map((item) => ({ book: item.book!, temp_id: crypto.randomUUID() }));
+    originalBookIds.value = selectedBooks.value.map(s => s.book.id);
+    Object.assign(originalForm, { name: form.name, reread_count: form.reread_count, start_date: form.start_date, end_date: form.end_date, rest_days: [...form.rest_days], color: form.color });
   }
 
   loading.value = false;
@@ -75,6 +96,16 @@ function toggleRestDay(day: number) {
   const idx = form.rest_days.indexOf(day);
   if (idx >= 0) form.rest_days.splice(idx, 1);
   else form.rest_days.push(day);
+}
+
+function setQuickEndDate(option: '1m' | '3m' | '6m' | 'year') {
+  const start = form.start_date ? new Date(form.start_date + 'T00:00:00') : new Date();
+  const end = new Date(start);
+  if (option === '1m') end.setMonth(end.getMonth() + 1);
+  else if (option === '3m') end.setMonth(end.getMonth() + 3);
+  else if (option === '6m') end.setMonth(end.getMonth() + 6);
+  else if (option === 'year') { end.setMonth(11); end.setDate(31); }
+  form.end_date = toLocalDateStr(end);
 }
 
 const totalPages = computed(() => {
@@ -123,8 +154,7 @@ async function toggleActive() {
   await fetchData();
 }
 
-async function deleteSet() {
-  if (!confirm("이 읽기 세트를 삭제할까요? 기록도 함께 삭제됩니다.")) return;
+async function doDelete() {
   await supabase.from("reading_sets").delete().eq("id", setId);
   navigateTo("/sets");
 }
@@ -133,33 +163,38 @@ onMounted(fetchData);
 </script>
 
 <template>
-  <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
+  <div class="px-4 pt-8 pb-8 max-w-lg mx-auto overflow-x-hidden">
     <div class="flex items-center gap-3 mb-6">
-      <NuxtLink to="/sets" class="text-gray-400 hover:text-black transition-colors">←</NuxtLink>
+      <NuxtLink to="/sets" class="text-gray-400 hover:text-black transition-colors p-1 -ml-1">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </NuxtLink>
       <h1 class="text-2xl font-bold text-black">읽기 세트 편집</h1>
     </div>
 
     <div v-if="loading" class="text-gray-400 text-sm">불러오는 중...</div>
 
-    <form v-else @submit.prevent="save" class="space-y-6">
-      <!-- Set name -->
-      <div>
+    <form v-else @submit.prevent="save" class="space-y-3">
+      <!-- 세트 이름 -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <label class="text-sm font-medium text-gray-700 block mb-1.5">세트 이름</label>
         <input
           v-model="form.name"
           required
-          class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
+          class="w-full bg-gray-100 px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
         />
       </div>
 
-      <!-- Color picker -->
-      <div>
-        <label class="text-sm font-medium text-gray-700 block mb-2">세트 색상</label>
+      <!-- 세트 색상 -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100">
+        <label class="text-sm font-medium text-gray-700 block mb-3">세트 색상</label>
         <div class="flex gap-2 flex-wrap">
           <button
             v-for="c in SET_COLORS"
             :key="c.id"
             type="button"
+            data-circle
             @click="form.color = c.id"
             class="w-8 h-8 rounded-full transition-transform"
             :class="[c.dot, form.color === c.id ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-80']"
@@ -168,34 +203,31 @@ onMounted(fetchData);
         </div>
       </div>
 
-      <!-- Book selection -->
-      <div>
-        <label class="text-sm font-medium text-gray-700 block mb-2">책 선택</label>
-        <div class="space-y-2">
+      <!-- 책 선택 -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100">
+        <label class="text-sm font-medium text-gray-700 block mb-3">책 선택</label>
+        <div class="flex flex-wrap gap-1.5">
           <button
             v-for="book in books"
             :key="book.id"
             type="button"
             @click="toggleBook(book)"
-            class="w-full text-left px-4 py-3 rounded-xl border-2 transition-colors text-sm"
-            :class="
-              isSelected(book.id)
-                ? 'bg-black border-black text-white'
-                : 'bg-white border-gray-100 text-gray-600 hover:border-gray-300'
-            "
+            class="flex items-center gap-2 px-3 py-2 border text-sm transition-colors bg-white border-gray-100 text-gray-700 hover:border-gray-300"
           >
             <span class="font-medium">{{ book.title }}</span>
-            <span class="ml-2 opacity-60">{{ book.readable_pages }}p</span>
+            <svg v-if="isSelected(book.id)" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
           </button>
         </div>
       </div>
 
-      <!-- Reading order -->
-      <div v-if="selectedBooks.length > 1">
+      <!-- 읽는 순서 -->
+      <div v-if="selectedBooks.length > 1" class="bg-white rounded-2xl p-5 border border-gray-100">
         <label class="text-sm font-medium text-gray-700 block mb-2">읽는 순서 (드래그로 변경)</label>
         <draggable v-model="selectedBooks" item-key="temp_id" handle=".drag-handle" class="space-y-2">
           <template #item="{ element, index }">
-            <div class="flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-3">
+            <div class="flex items-center gap-3 bg-gray-100 px-4 py-3" style="border-radius:8px">
               <span class="drag-handle cursor-grab text-gray-400 text-lg select-none">⠿</span>
               <span class="text-sm text-gray-400 w-5">{{ index + 1 }}</span>
               <span class="flex-1 text-sm font-medium text-black">{{ element.book.title }}</span>
@@ -204,8 +236,8 @@ onMounted(fetchData);
         </draggable>
       </div>
 
-      <!-- Reread count -->
-      <div>
+      <!-- 회독 횟수 -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <label class="text-sm font-medium text-gray-700 block mb-1.5">회독 횟수</label>
         <input
           v-model.number="form.reread_count"
@@ -213,55 +245,60 @@ onMounted(fetchData);
           min="1"
           max="10"
           required
-          class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
+          class="w-full bg-gray-100 px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
         />
       </div>
 
-      <!-- Dates -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1.5">시작일</label>
-          <input
-            v-model="form.start_date"
-            type="date"
-            required
-            class="w-full bg-gray-100 rounded-xl px-3 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
-          />
+      <!-- 기간 카드 -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100">
+        <label class="text-sm font-medium text-gray-700 block mb-3">기간</label>
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <p class="text-xs text-gray-400 mb-1">시작일</p>
+            <input
+              v-model="form.start_date"
+              type="date"
+              required
+              class="w-full bg-gray-100 px-3 py-2.5 text-sm outline-none focus:bg-gray-200 transition-colors"
+            />
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-1">종료일</p>
+            <input
+              v-model="form.end_date"
+              type="date"
+              required
+              class="w-full bg-gray-100 px-3 py-2.5 text-sm outline-none focus:bg-gray-200 transition-colors"
+            />
+          </div>
         </div>
-        <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1.5">종료일</label>
-          <input
-            v-model="form.end_date"
-            type="date"
-            required
-            class="w-full bg-gray-100 rounded-xl px-3 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
-          />
+        <div class="flex gap-1.5">
+          <button type="button" @click="setQuickEndDate('1m')" class="flex-1 bg-gray-100 text-gray-600 text-xs font-medium py-2 hover:bg-gray-200 transition-colors">1개월</button>
+          <button type="button" @click="setQuickEndDate('3m')" class="flex-1 bg-gray-100 text-gray-600 text-xs font-medium py-2 hover:bg-gray-200 transition-colors">3개월</button>
+          <button type="button" @click="setQuickEndDate('6m')" class="flex-1 bg-gray-100 text-gray-600 text-xs font-medium py-2 hover:bg-gray-200 transition-colors">6개월</button>
+          <button type="button" @click="setQuickEndDate('year')" class="flex-1 bg-gray-100 text-gray-600 text-xs font-medium py-2 hover:bg-gray-200 transition-colors">연말</button>
         </div>
       </div>
 
-      <!-- Rest days -->
-      <div>
-        <label class="text-sm font-medium text-gray-700 block mb-2">쉬는 날</label>
+      <!-- 쉬는 날 -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100">
+        <label class="text-sm font-medium text-gray-700 block mb-3">쉬는 날</label>
         <div class="flex gap-1.5">
           <button
             v-for="(label, idx) in DAY_LABELS"
             :key="idx"
             type="button"
             @click="toggleRestDay(idx)"
-            class="flex-1 py-2 rounded-full text-xs font-medium transition-colors"
-            :class="
-              form.rest_days.includes(idx)
-                ? 'bg-black text-white'
-                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-            "
+            class="flex-1 py-2 text-xs font-medium transition-colors"
+            :class="form.rest_days.includes(idx) ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'"
           >
             {{ label }}
           </button>
         </div>
       </div>
 
-      <!-- Schedule preview -->
-      <div v-if="totalPages > 0 && dailyPages > 0" class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+      <!-- 스케줄 미리보기 -->
+      <div v-if="totalPages > 0 && dailyPages > 0" class="bg-white rounded-2xl p-5 border border-gray-100">
         <p class="text-xs text-gray-400 mb-3">스케줄 미리보기</p>
         <div class="grid grid-cols-3 gap-3 text-center">
           <div>
@@ -282,7 +319,8 @@ onMounted(fetchData);
       <button
         type="submit"
         :disabled="saving || selectedBooks.length === 0"
-        class="w-full bg-black hover:bg-gray-900 disabled:opacity-40 text-white font-medium py-3.5 rounded-full transition-colors text-sm"
+        class="w-full font-medium py-3.5 transition-colors text-sm"
+        :class="hasChanges ? 'bg-black text-white' : 'bg-gray-100 text-gray-400 cursor-default'"
       >
         {{ saving ? "저장 중..." : "변경사항 저장" }}
       </button>
@@ -291,7 +329,7 @@ onMounted(fetchData);
         <button
           type="button"
           @click="toggleActive"
-          class="w-full text-sm py-3 rounded-full transition-colors font-medium"
+          class="w-full text-sm py-3 transition-colors font-medium"
           :class="currentSet?.is_active
             ? 'bg-gray-100 hover:bg-gray-200 text-gray-600'
             : 'bg-gray-100 hover:bg-gray-200 text-black'"
@@ -300,12 +338,27 @@ onMounted(fetchData);
         </button>
         <button
           type="button"
-          @click="deleteSet"
-          class="w-full text-sm bg-gray-100 hover:bg-red-50 text-red-400 hover:text-red-500 py-3 rounded-full transition-colors font-medium"
+          @click="showDeleteConfirm = true"
+          class="w-full text-center text-sm py-2 bg-transparent"
+          style="color:#999"
         >
           세트 삭제
         </button>
       </div>
     </form>
+
+    <!-- 삭제 확인 모달 -->
+    <Teleport to="body">
+      <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
+        <div class="bg-white rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm">
+          <h3 class="font-bold text-black mb-1">세트를 삭제할까요?</h3>
+          <p class="text-sm text-gray-400 mb-5">읽은 기록도 함께 삭제되고, 다시 복구할 수 없어요.</p>
+          <div class="flex gap-2">
+            <button @click="showDeleteConfirm = false" class="flex-1 bg-gray-100 text-gray-700 font-medium py-3 text-sm">취소</button>
+            <button @click="doDelete" class="flex-1 bg-black text-white font-medium py-3 text-sm">삭제</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

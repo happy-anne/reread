@@ -27,7 +27,7 @@ onMounted(() => {
     <div class="mb-12">
       <h1 class="text-5xl font-bold tracking-tight min-h-[3.5rem]">
         <span class="text-black">{{ "re".slice(0, Math.min(logoChars, 2)) }}</span>
-        <span v-if="logoChars > 2" style="color:#0000ee">:</span>
+        <span v-if="logoChars > 2" style="color:#3182f6">:</span>
         <span class="text-black">{{ "read".slice(0, Math.max(0, logoChars - 3)) }}</span>
         <span v-if="logoChars < LOGO.length" class="animate-pulse opacity-40 text-black">|</span>
       </h1>
@@ -38,10 +38,7 @@ onMounted(() => {
       class="text-gray-500 text-sm leading-[1.5] transition-opacity duration-700"
       :class="showDesc ? 'opacity-100' : 'opacity-0'"
     >
-      <p>읽고 싶은 책들을 골라</p>
-      <p>회독 계획을 세우면,</p>
-      <p class="mt-2">오늘 읽을 분량을</p>
-      <p>자동으로 계산해드려요.</p>
+      <p>오늘도 한 페이지의 여행을.</p>
     </div>
 
     <div class="mt-12 flex justify-center">

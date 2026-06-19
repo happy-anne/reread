@@ -1,6 +1,37 @@
 @import "tailwindcss";
 
+/* ── Global +2px font size override ── */
+@theme {
+  --text-xs:   0.875rem;   /* 14px  (was 12px) */
+  --text-sm:   1rem;       /* 16px  (was 14px) */
+  --text-base: 1.125rem;   /* 18px  (was 16px) */
+  --text-lg:   1.25rem;    /* 20px  (was 18px) */
+  --text-xl:   1.375rem;   /* 22px  (was 20px) */
+  --text-2xl:  1.625rem;   /* 26px  (was 24px) */
+  --text-3xl:  2rem;       /* 32px  (was 30px) */
+  --text-4xl:  2.375rem;   /* 38px  (was 36px) */
+  --text-5xl:  3.125rem;   /* 50px  (was 48px) */
+}
+
+:root {
+  --accent: #3182f6;
+}
+
+body {
+  background-color: #f7f8f8;
+}
+
 /* Prevent iOS zoom on input focus */
 input, select, textarea {
   font-size: 16px;
+}
+
+/* Prevent double-tap zoom on buttons */
+button, a {
+  touch-action: manipulation;
+}
+
+/* 모든 버튼·인풋 border-radius 8px — [data-circle] 예외는 원형 유지 */
+button:not([data-circle]), input, select, textarea {
+  border-radius: 8px !important;
 }

@@ -1,5 +1,5 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex items-center justify-around px-2 py-2 z-50">
+  <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex items-center justify-around px-2 pt-2 pb-4 z-50">
     <NuxtLink
       v-for="item in navItems"
       :key="item.to"
@@ -8,7 +8,7 @@
       :class="isActive(item.to) ? 'text-black' : 'text-gray-400 hover:text-gray-600'"
     >
       <component :is="item.icon" class="w-5 h-5" />
-      <span class="text-[10px] font-medium">{{ item.label }}</span>
+      <span class="text-[11px] font-medium">{{ item.label }}</span>
     </NuxtLink>
   </nav>
 </template>
