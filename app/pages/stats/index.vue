@@ -194,7 +194,7 @@ onMounted(fetchAll);
               class="flex-shrink-0 text-gray-400 hover:text-black transition-colors p-1"
               title="편집"
             >
-              <svg width="16" height="16" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg width="24" height="24" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M96 215.999H48C45.8783 215.999 43.8435 215.156 42.3432 213.656C40.8429 212.156 40 210.121 40 207.999V163.299C39.9964 162.26 40.1977 161.231 40.5923 160.27C40.987 159.309 41.5673 158.435 42.3 157.699L162.3 37.6991C163.044 36.9432 163.932 36.343 164.91 35.9332C165.889 35.5235 166.939 35.3125 168 35.3125C169.061 35.3125 170.111 35.5235 171.09 35.9332C172.068 36.343 172.956 36.9432 173.7 37.6991L218.3 82.2991C219.056 83.0435 219.656 83.9308 220.066 84.9094C220.476 85.888 220.687 86.9382 220.687 87.9991C220.687 89.06 220.476 90.1103 220.066 91.0889C219.656 92.0674 219.056 92.9547 218.3 93.6991L96 215.999Z" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M216 216H96" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M136 64L192 120" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
