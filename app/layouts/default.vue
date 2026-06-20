@@ -24,7 +24,7 @@ onMounted(() => {
   } else if ((getDaysRemaining() ?? 1) <= 0) {
     clearLoginAt();
     supabase.auth.signOut().then(() => {
-      navigateTo("/login");
+      navigateTo("/");
     });
     return;
   }

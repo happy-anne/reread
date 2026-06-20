@@ -66,7 +66,7 @@ async function saveSettings() {
 async function signOut() {
   clearLoginAt();
   await supabase.auth.signOut();
-  navigateTo("/login");
+  navigateTo("/");
 }
 
 function openPinModal() {
