@@ -166,8 +166,8 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-8 max-w-lg mx-auto overflow-x-hidden">
     <div class="flex items-center gap-3 mb-6">
       <NuxtLink to="/sets" class="text-gray-400 hover:text-black transition-colors p-1 -ml-1">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 18l-6-6 6-6"/>
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 1L1 8.5L9 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </NuxtLink>
       <h1 class="text-2xl font-bold text-black">읽기 세트 편집</h1>
@@ -350,9 +350,9 @@ onMounted(fetchData);
 
     <!-- 삭제 확인 모달 -->
     <Teleport to="body">
-      <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
-        <div class="bg-white rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm">
-          <h3 class="font-bold text-black mb-1">세트를 삭제할까요?</h3>
+      <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
+          <h3 class="font-bold text-black mb-1" style="font-size:22px">세트를 삭제할까요?</h3>
           <p class="text-sm text-gray-400 mb-5">읽은 기록도 함께 삭제되고, 다시 복구할 수 없어요.</p>
           <div class="flex gap-2">
             <button @click="showDeleteConfirm = false" class="flex-1 bg-gray-100 text-gray-700 font-medium py-3 text-sm">취소</button>

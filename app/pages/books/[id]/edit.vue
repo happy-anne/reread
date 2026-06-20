@@ -101,9 +101,9 @@ async function doDelete() {
 
     <!-- 삭제 확인 모달 -->
     <Teleport to="body">
-      <div v-if="deleteTarget" class="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50">
-        <div class="bg-white rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm">
-          <h3 class="font-bold text-black mb-1">책을 삭제할까요?</h3>
+      <div v-if="deleteTarget" class="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-sm">
+          <h3 class="font-bold text-black mb-1" style="font-size:22px">책을 삭제할까요?</h3>
           <p class="text-sm text-gray-400 mb-5">삭제 후에는 복구할 수 없어요.</p>
           <div class="flex gap-2">
             <button @click="deleteTarget = false" class="flex-1 bg-gray-100 text-gray-700 font-medium py-3 text-sm">취소</button>

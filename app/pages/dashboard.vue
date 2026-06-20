@@ -183,7 +183,11 @@ onMounted(fetchData);
   <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
     <!-- Brand header -->
     <div class="text-center mb-8">
-      <h1 class="mb-1"><AppLogo size="32px" /></h1>
+      <h1 class="mb-1">
+        <span class="font-bold" style="font-size:32px;letter-spacing:0">
+          <span style="color:#191F28">re</span><span class="colon-blink" style="color:#a6aeba">:</span><span style="color:#191F28">read</span>
+        </span>
+      </h1>
       <p class="text-gray-400 text-xs mt-1">Read again. With a plan.</p>
     </div>
 
@@ -197,11 +201,11 @@ onMounted(fetchData);
       </NuxtLink>
     </div>
 
-    <div v-else class="space-y-5">
+    <div v-else class="space-y-2.5">
       <div
         v-for="{ set_id, schedule } in todaySchedules"
         :key="set_id"
-        class="bg-white rounded-3xl p-5 sm:p-6 border border-gray-100"
+        class="bg-white rounded-3xl px-5 py-7 sm:px-6 border border-gray-100"
       >
         <!-- Set name + round + percent -->
         <div class="flex items-center justify-center gap-2 mb-4">
@@ -210,8 +214,7 @@ onMounted(fetchData);
             :style="{ backgroundColor: getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').hex }"
           /> -->
           <p class="text-xs text-gray-400 font-medium">
-            {{ activeSets.find((s) => s.id === set_id)?.name }} · Round {{ schedule.reread_round }}
-            <span class="ml-1 text-gray-300">{{ getSetPercent(set_id) }}%</span>
+            {{ activeSets.find((s) => s.id === set_id)?.name }} · R{{ schedule.reread_round }} · {{ getSetPercent(set_id) }}%
           </p>
         </div>
 
@@ -228,7 +231,7 @@ onMounted(fetchData);
             :key="p"
             @click="saveProgress(set_id, schedule, p)"
             :disabled="saving[set_id]"
-            class="px-3 py-1.5 text-xs font-mono transition-colors"
+            class="px-1.5 py-1.5 text-xs font-mono transition-colors"
             :class="
               getLog(set_id)?.actual_page === p
                 ? 'text-white font-bold'
@@ -245,13 +248,13 @@ onMounted(fetchData);
             :min="schedule.start_page"
             :max="schedule.end_page + 100"
             placeholder="직접"
-            class="w-16 text-center bg-white border px-2 py-1.5 outline-none focus:border-gray-400" style="font-size:14px;border-color:rgba(0,0,0,0.1)"
+            class="w-16 text-center bg-white border px-1.5 py-1.5 outline-none focus:border-gray-400" style="font-size:14px;border-color:rgba(0,0,0,0.1)"
           />
           <button
             v-if="pageInput[set_id]"
             @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
             :disabled="saving[set_id]"
-            class="disabled:opacity-40 text-white font-medium px-4 py-1.5 text-sm transition-colors"
+            class="disabled:opacity-40 text-white font-medium px-1.5 py-1.5 text-sm transition-colors"
             style="background-color:#000"
           >
             저장
@@ -261,7 +264,7 @@ onMounted(fetchData);
           <button
             @click="markPassed(set_id, schedule)"
             :disabled="saving[set_id]"
-            class="px-3 py-1.5 text-xs font-mono transition-colors bg-white hover:bg-gray-100 text-gray-400 border border-gray-100"
+            class="px-1.5 py-1.5 text-xs font-mono transition-colors bg-white hover:bg-gray-100 text-gray-400 border border-gray-100"
             style="min-width:35px"
           >
             패스
@@ -271,3 +274,13 @@ onMounted(fetchData);
     </div>
   </div>
 </template>
+
+<style scoped>
+@keyframes colonBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.colon-blink {
+  animation: colonBlink 1.2s ease-in-out infinite;
+}
+</style>

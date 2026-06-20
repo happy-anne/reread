@@ -54,3 +54,8 @@ button, a {
 button:not([data-circle]), input, select, textarea {
   border-radius: 8px !important;
 }
+
+/* 카드 그림자 */
+.rounded-2xl.border {
+  box-shadow: 0 1px 28px 0 rgba(0, 0, 0, 0.02);
+}

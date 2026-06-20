@@ -17,7 +17,7 @@ async function login() {
   if (err) error.value = err.message;
   else {
     markLoginNow();
-    navigateTo("/welcome");
+    navigateTo("/dashboard");
   }
   loading.value = false;
 }
@@ -26,8 +26,8 @@ async function login() {
 <template>
   <div class="w-full max-w-sm">
     <div class="mb-10 text-center">
-      <h1 class="mb-1"><AppLogo size="44px" /></h1>
-      <p class="text-gray-400 text-sm mt-2">Read again. With a plan.</p>
+      <h1><AppLogo size="40px" /></h1>
+      <p class="text-gray-400 text-sm">Read again. With a plan.</p>
     </div>
 
     <form @submit.prevent="login" class="space-y-3">
