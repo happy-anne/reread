@@ -11,7 +11,7 @@
         class="w-6 h-6"
         :alt="item.label"
       />
-      <span class="font-medium" style="font-size:13px">{{ item.label }}</span>
+      <span style="font-size:13px;font-weight:400">{{ item.label }}</span>
     </NuxtLink>
   </nav>
 </template>
