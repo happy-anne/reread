@@ -278,6 +278,26 @@ onMounted(fetchAll);
           <span class="inline-block rounded-full" style="width:8px;height:8px;background:#AAA" />패스
         </span>
       </div>
+
+      <!-- Monthly status counts -->
+      <div class="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-gray-100">
+        <div class="text-center">
+          <p class="font-bold text-black" style="font-size:18px">{{ filteredMonthLogs.filter(l => l.status === 'completed').length }}</p>
+          <p class="text-gray-400 mt-0.5" style="font-size:12px">완료</p>
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-black" style="font-size:18px">{{ filteredMonthLogs.filter(l => l.status === 'partial').length }}</p>
+          <p class="text-gray-400 mt-0.5" style="font-size:12px">부분</p>
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-black" style="font-size:18px">{{ filteredMonthLogs.filter(l => l.status === 'not_done').length }}</p>
+          <p class="text-gray-400 mt-0.5" style="font-size:12px">못읽음</p>
+        </div>
+        <div class="text-center">
+          <p class="font-bold text-black" style="font-size:18px">{{ filteredMonthLogs.filter(l => l.status === 'passed').length }}</p>
+          <p class="text-gray-400 mt-0.5" style="font-size:12px">패스</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
