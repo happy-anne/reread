@@ -159,7 +159,7 @@ onMounted(fetchAll);
 </script>
 
 <template>
-  <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
+  <div class="px-4 pt-8 pb-8 max-w-lg mx-auto">
     <h1 class="text-2xl font-bold mb-6">통계</h1>
 
     <!-- Set selector -->

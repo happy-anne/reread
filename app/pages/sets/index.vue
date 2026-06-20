@@ -38,7 +38,7 @@ onMounted(fetchSets);
 </script>
 
 <template>
-  <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
+  <div class="px-4 pt-8 pb-8 max-w-lg mx-auto">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-black">세트</h1>
       <NuxtLink

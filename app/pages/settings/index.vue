@@ -129,7 +129,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 </script>
 
 <template>
-  <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
+  <div class="px-4 pt-8 pb-8 max-w-lg mx-auto">
     <h1 class="text-2xl font-bold text-black mb-6">설정</h1>
 
     <div class="space-y-2.5">

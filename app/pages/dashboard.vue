@@ -180,7 +180,7 @@ onMounted(fetchData);
 </script>
 
 <template>
-  <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
+  <div class="px-4 pt-8 pb-8 max-w-lg mx-auto">
     <!-- Brand header -->
     <div class="text-center mb-8">
       <h1 class="mb-1">

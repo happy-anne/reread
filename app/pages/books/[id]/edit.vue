@@ -51,7 +51,7 @@ async function doDelete() {
 </script>
 
 <template>
-  <div class="px-4 pt-8 pb-4 max-w-lg mx-auto">
+  <div class="px-4 pt-8 pb-8 max-w-lg mx-auto">
     <div class="flex items-center gap-3 mb-6">
       <NuxtLink to="/books" class="text-gray-400 hover:text-black transition-colors p-1 -ml-1">
         <svg width="10" height="17" viewBox="0 0 10 17" fill="none" xmlns="http://www.w3.org/2000/svg">
