@@ -20,20 +20,6 @@ function base64urlDecode(str: string): Uint8Array {
   return Uint8Array.from(bin, (c) => c.charCodeAt(0))
 }
 
-// raw 32바이트 P-256 private key → PKCS8 DER
-function rawKeyToPkcs8(raw: Uint8Array): ArrayBuffer {
-  const prefix = new Uint8Array([
-    0x30, 0x41, 0x02, 0x01, 0x00, 0x30, 0x13,
-    0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
-    0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07,
-    0x04, 0x27, 0x30, 0x25, 0x02, 0x01, 0x01, 0x04, 0x20,
-  ])
-  const pkcs8 = new Uint8Array(prefix.length + raw.length)
-  pkcs8.set(prefix)
-  pkcs8.set(raw, prefix.length)
-  return pkcs8.buffer
-}
-
 async function createVapidJwt(endpoint: string): Promise<string> {
   const audience = new URL(endpoint).origin
   const exp = Math.floor(Date.now() / 1000) + 12 * 60 * 60
@@ -42,10 +28,14 @@ async function createVapidJwt(endpoint: string): Promise<string> {
   const payload = base64urlEncode(JSON.stringify({ aud: audience, exp, sub: VAPID_SUBJECT }))
   const unsigned = `${header}.${payload}`
 
-  const rawKey = base64urlDecode(VAPID_PRIVATE_KEY)
+  // 공개키에서 x, y 좌표 추출 (uncompressed: 0x04 || x || y)
+  const pubKeyBytes = base64urlDecode(VAPID_PUBLIC_KEY)
+  const x = base64urlEncode(pubKeyBytes.slice(1, 33))
+  const y = base64urlEncode(pubKeyBytes.slice(33, 65))
+
   const cryptoKey = await crypto.subtle.importKey(
-    'pkcs8',
-    rawKeyToPkcs8(rawKey),
+    'jwk',
+    { kty: 'EC', crv: 'P-256', d: VAPID_PRIVATE_KEY, x, y },
     { name: 'ECDSA', namedCurve: 'P-256' },
     false,
     ['sign'],
@@ -74,8 +64,11 @@ async function sendPush(endpoint: string): Promise<Response> {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────
-Deno.serve(async () => {
+Deno.serve(async (req) => {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+  const url = new URL(req.url)
+  const testMode = url.searchParams.get('test') === '1'
 
   // 현재 KST 시간 (UTC+9)
   const now = new Date()
@@ -83,16 +76,24 @@ Deno.serve(async () => {
   const kstMinute = now.getUTCMinutes()
   const timeStr = `${String(kstHour).padStart(2, '0')}:${String(kstMinute).padStart(2, '0')}`
 
-  const { data: settings } = await supabase
-    .from('user_settings')
-    .select('user_id')
-    .like('notification_time', `${timeStr}%`)
+  let userIds: string[]
 
-  if (!settings?.length) {
-    return new Response(JSON.stringify({ sent: 0 }), { headers: { 'Content-Type': 'application/json' } })
+  if (testMode) {
+    // 테스트 모드: 시간 무관하게 모든 구독자에게 전송
+    const { data: allSubs } = await supabase.from('push_subscriptions').select('user_id')
+    userIds = [...new Set((allSubs ?? []).map((s: { user_id: string }) => s.user_id))]
+  } else {
+    const { data: settings } = await supabase
+      .from('user_settings')
+      .select('user_id')
+      .like('notification_time', `${timeStr}%`)
+
+    if (!settings?.length) {
+      return new Response(JSON.stringify({ sent: 0, time: timeStr }), { headers: { 'Content-Type': 'application/json' } })
+    }
+    userIds = settings.map((s: { user_id: string }) => s.user_id)
   }
 
-  const userIds = settings.map((s: { user_id: string }) => s.user_id)
   const { data: subs } = await supabase
     .from('push_subscriptions')
     .select('endpoint, user_id')
@@ -104,14 +105,22 @@ Deno.serve(async () => {
 
   let sent = 0
   const expired: string[] = []
+  const errors: string[] = []
 
   await Promise.allSettled(
     subs.map(async (sub: { endpoint: string; user_id: string }) => {
-      const res = await sendPush(sub.endpoint)
-      if (res.ok || res.status === 201) {
-        sent++
-      } else if (res.status === 410) {
-        expired.push(sub.endpoint)
+      try {
+        const res = await sendPush(sub.endpoint)
+        if (res.ok || res.status === 201) {
+          sent++
+        } else if (res.status === 410) {
+          expired.push(sub.endpoint)
+        } else {
+          const body = await res.text()
+          errors.push(`${res.status}: ${body.slice(0, 200)}`)
+        }
+      } catch (e) {
+        errors.push(`exception: ${String(e)}`)
       }
     }),
   )
@@ -122,7 +131,7 @@ Deno.serve(async () => {
   }
 
   return new Response(
-    JSON.stringify({ sent, total: subs.length }),
+    JSON.stringify({ sent, total: subs.length, errors }),
     { headers: { 'Content-Type': 'application/json' } },
   )
 })
