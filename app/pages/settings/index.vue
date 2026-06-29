@@ -168,13 +168,13 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
           </a>
         </div>
 
-        <div>
+        <div class="w-full overflow-hidden">
           <label class="text-sm text-gray-500 block mb-1.5">알림 시간</label>
           <input
             v-model="notificationTime"
             type="time"
-            class="w-full max-w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
-            style="box-sizing:border-box"
+            class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors"
+            style="box-sizing:border-box;-webkit-appearance:none;display:block;min-width:0"
           />
         </div>
       </div>
