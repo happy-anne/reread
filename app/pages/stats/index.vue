@@ -261,7 +261,13 @@ onMounted(fetchAll);
       <div class="flex items-center justify-between mb-4">
         <button @click="prevMonth" class="text-gray-500 hover:text-gray-900 px-2">‹</button>
         <h2 class="font-semibold">{{ monthDisplay }}</h2>
-        <button @click="nextMonth" class="text-gray-500 hover:text-gray-900 px-2">›</button>
+        <div class="flex items-center gap-1">
+          <button
+            @click="currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`; fetchMonthLogs()"
+            class="text-xs text-gray-400 hover:text-gray-900 px-2 py-0.5 rounded-full border border-gray-200 hover:border-gray-400 transition-colors"
+          >오늘</button>
+          <button @click="nextMonth" class="text-gray-500 hover:text-gray-900 px-2">›</button>
+        </div>
       </div>
 
       <div class="grid grid-cols-7 gap-1 mb-1">
