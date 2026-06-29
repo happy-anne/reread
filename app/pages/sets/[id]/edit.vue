@@ -16,6 +16,12 @@ const loading = ref(true);
 const currentSet = ref<ReadingSet | null>(null);
 const showDeleteConfirm = ref(false);
 
+function formatDate(iso: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+
 const form = reactive({
   name: "",
   reread_count: 2,
@@ -325,6 +331,11 @@ onMounted(fetchData);
       >
         {{ saving ? "저장 중..." : "변경사항 저장" }}
       </button>
+
+      <div v-if="currentSet" class="text-center mt-1 mb-1" style="font-size:12px;color:#999;line-height:1.7">
+        <p>최초 작성일 {{ formatDate(currentSet.created_at) }}</p>
+        <p>최종 편집일 {{ formatDate(currentSet.updated_at) }}</p>
+      </div>
 
       <div class="space-y-2 pt-2">
         <button
