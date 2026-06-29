@@ -214,7 +214,7 @@ onMounted(fetchData);
             :style="{ backgroundColor: getSetColor(activeSets.find(s=>s.id===set_id)?.color??'').hex }"
           /> -->
           <p class="text-xs text-gray-400 font-medium">
-            {{ activeSets.find((s) => s.id === set_id)?.name }} · R{{ schedule.reread_round }} · {{ getSetPercent(set_id) }}%
+            {{ activeSets.find((s) => s.id === set_id)?.name }}<template v-if="(activeSets.find((s) => s.id === set_id)?.reread_count ?? 1) > 1"> · R{{ schedule.reread_round }}</template> · {{ getSetPercent(set_id) }}%
           </p>
         </div>
 
