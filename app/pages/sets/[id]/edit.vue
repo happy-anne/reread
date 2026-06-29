@@ -332,7 +332,7 @@ onMounted(fetchData);
         {{ saving ? "저장 중..." : "변경사항 저장" }}
       </button>
 
-      <div v-if="currentSet" class="text-center mt-1 mb-1" style="font-size:12px;color:#999;line-height:1.7">
+      <div v-if="currentSet" class="text-center mt-1 mb-2" style="font-size:12px;color:#999;line-height:1.7">
         <p>최초 작성일 {{ formatDate(currentSet.created_at) }}</p>
         <p>최종 편집일 {{ formatDate(currentSet.updated_at) }}</p>
       </div>
