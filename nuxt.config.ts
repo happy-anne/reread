@@ -37,7 +37,7 @@ export default defineNuxtConfig({
     vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
     vapidSubject: process.env.VAPID_SUBJECT,
     public: {
-      vapidPublicKey: process.env.VAPID_PUBLIC_KEY,
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY ?? 'BLWYUkO4oIe_lh40TtEZAsufc8hldKocsoXneLBwmlULczu4vdLTXci8vlge8RU_HAPNEL1h0dX0xKKKPsBkbK8',
     },
   },
 
