@@ -183,7 +183,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <h2 class="font-semibold text-black mb-1">기본 쉬는 날</h2>
         <p class="text-gray-400 text-xs mb-3">새 읽기 세트에 기본 적용돼요. 각 세트에서 변경할 수 있어요.</p>
-        <div class="flex gap-1.5 mb-4">
+        <div class="flex gap-1.5">
           <button
             v-for="(label, idx) in DAY_LABELS"
             :key="idx"
@@ -196,15 +196,19 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             {{ label }}
           </button>
         </div>
-        <button
-          @click="saveSettings"
-          :disabled="saving"
-          class="w-full font-medium py-3 rounded-full text-sm transition-colors"
-          :class="hasChanges ? 'bg-black hover:bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 cursor-default'"
-        >
-          {{ saving ? "저장 중..." : savedMsg ? "저장됨!" : "설정 저장" }}
-        </button>
       </div>
+
+      <!-- 설정 저장 버튼 -->
+      <button
+        @click="saveSettings"
+        :disabled="saving"
+        class="w-full font-medium py-3 rounded-full text-sm transition-colors"
+        :class="hasChanges ? 'bg-black hover:bg-gray-900 text-white' : 'bg-gray-100 text-gray-400 cursor-default'"
+      >
+        {{ saving ? "저장 중..." : savedMsg ? "저장됨!" : "설정 저장" }}
+      </button>
+
+      <div class="h-5" />
 
       <!-- Security -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
