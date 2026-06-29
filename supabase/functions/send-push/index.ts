@@ -81,12 +81,12 @@ Deno.serve(async () => {
   const now = new Date()
   const kstHour = (now.getUTCHours() + 9) % 24
   const kstMinute = now.getUTCMinutes()
-  const timeStr = `${String(kstHour).padStart(2, '0')}:${String(kstMinute).padStart(2, '0')}:00`
+  const timeStr = `${String(kstHour).padStart(2, '0')}:${String(kstMinute).padStart(2, '0')}`
 
   const { data: settings } = await supabase
     .from('user_settings')
     .select('user_id')
-    .eq('notification_time', timeStr)
+    .like('notification_time', `${timeStr}%`)
 
   if (!settings?.length) {
     return new Response(JSON.stringify({ sent: 0 }), { headers: { 'Content-Type': 'application/json' } })
