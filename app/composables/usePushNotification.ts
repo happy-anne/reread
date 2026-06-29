@@ -3,15 +3,15 @@ export function usePushNotification() {
   const user = useSupabaseUser()
   const config = useRuntimeConfig()
 
-  const supported = computed(
-    () => import.meta.client && 'serviceWorker' in navigator && 'PushManager' in window,
-  )
+  const supported = ref(false)
   const permission = ref<NotificationPermission>('default')
   const subscribed = ref(false)
   const loading = ref(false)
 
   async function checkStatus() {
-    if (!import.meta.client || !supported.value) return
+    if (!import.meta.client) return
+    supported.value = 'serviceWorker' in navigator && 'PushManager' in window
+    if (!supported.value) return
     permission.value = Notification.permission
     if (permission.value === 'granted' && user.value) {
       const reg = await navigator.serviceWorker.ready
