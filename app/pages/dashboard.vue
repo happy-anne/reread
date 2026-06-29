@@ -194,7 +194,7 @@ onMounted(fetchData);
     <div v-if="loading" class="text-gray-400 text-sm text-center">불러오는 중...</div>
 
     <div v-else-if="todaySchedules.length === 0" class="text-center py-16 text-gray-400">
-      <p class="text-4xl mb-3">📚</p>
+      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
       <p>오늘 진행 중인 읽기 세트가 없어요.</p>
       <NuxtLink to="/sets" class="text-black text-sm mt-2 inline-block underline">
         읽기 세트 만들기 →

@@ -10,6 +10,8 @@ const monthLogs = ref<ReadingLog[]>([]);
 const allLogs = ref<ReadingLog[]>([]);
 const sets = ref<(ReadingSet & { items: ReadingSetItem[] })[]>([]);
 const selectedSetId = ref<string>("");
+const bookCount = ref<number | null>(null);
+const isLoaded = ref(false);
 
 const now = new Date();
 const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
@@ -143,15 +145,18 @@ async function fetchMonthLogs() {
 
 async function fetchAll() {
   if (!user.value) return;
-  const [{ data: logs }, { data: setsData }] = await Promise.all([
+  const [{ data: logs }, { data: setsData }, { count }] = await Promise.all([
     supabase.from("reading_logs").select("*").eq("user_id", user.value.id),
     supabase
       .from("reading_sets")
       .select("*, items:reading_set_items(*, book:books(*))")
       .eq("user_id", user.value.id),
+    supabase.from("books").select("*", { count: "exact", head: true }).eq("user_id", user.value.id),
   ]);
   allLogs.value = (logs as ReadingLog[]) ?? [];
   sets.value = (setsData as any[]) ?? [];
+  bookCount.value = count ?? 0;
+  isLoaded.value = true;
   await fetchMonthLogs();
 }
 
@@ -162,6 +167,27 @@ onMounted(fetchAll);
   <div class="px-4 pt-8 pb-8 max-w-lg mx-auto">
     <h1 class="text-2xl font-bold mb-6">통계</h1>
 
+    <!-- Empty state -->
+    <div v-if="isLoaded && sets.length === 0" class="flex flex-col items-center justify-center py-20 text-center gap-4">
+      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto" style="opacity:0.3" alt="" />
+      <p class="text-gray-400 text-base">책과 세트를 등록하면<br>독서 통계를 볼 수 있어요.</p>
+      <NuxtLink
+        v-if="bookCount === 0"
+        to="/books/new"
+        class="mt-2 px-5 py-2.5 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+      >
+        책 등록하기
+      </NuxtLink>
+      <NuxtLink
+        v-else
+        to="/sets/new"
+        class="mt-2 px-5 py-2.5 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+      >
+        세트 만들기
+      </NuxtLink>
+    </div>
+
+    <template v-if="!isLoaded || sets.length > 0">
     <!-- Set selector -->
     <div v-if="selectableSets.length > 0" class="bg-white rounded-2xl p-4 border border-gray-100 mb-4">
       <select
@@ -299,6 +325,7 @@ onMounted(fetchAll);
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 

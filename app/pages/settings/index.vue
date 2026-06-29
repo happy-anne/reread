@@ -18,6 +18,9 @@ const hasChanges = computed(
 
 const daysRemaining = ref<number | null>(null);
 
+// Push notifications
+const { supported: pushSupported, permission: pushPermission, subscribed: pushSubscribed, loading: pushLoading, checkStatus: checkPush, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotification()
+
 // PIN management
 const pinSet = ref(false);
 const showPinModal = ref(false);
@@ -123,6 +126,7 @@ onMounted(() => {
   fetchSettings();
   daysRemaining.value = getDaysRemaining();
   pinSet.value = hasPin();
+  checkPush();
   window.addEventListener("keydown", onPinKeydown);
 });
 onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
@@ -135,7 +139,33 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
     <div class="space-y-2.5">
       <!-- Notification -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100 overflow-hidden">
-        <h2 class="font-semibold text-black mb-3">알림</h2>
+        <!-- 푸시 알림 토글 -->
+        <div v-if="pushSupported" class="flex items-center justify-between mb-4">
+          <div>
+            <p class="font-semibold text-black">푸시 알림</p>
+            <p class="text-xs mt-0.5" :class="pushPermission === 'denied' ? 'text-red-400' : 'text-gray-400'">
+              <template v-if="pushPermission === 'denied'">브라우저에서 알림을 차단했어요</template>
+              <template v-else-if="pushSubscribed">알림이 켜져 있어요</template>
+              <template v-else>알림이 꺼져 있어요</template>
+            </p>
+          </div>
+          <button
+            v-if="pushPermission !== 'denied'"
+            @click="pushSubscribed ? unsubscribePush() : subscribePush()"
+            :disabled="pushLoading"
+            class="relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0"
+            :class="pushSubscribed ? 'bg-black' : 'bg-gray-200'"
+          >
+            <span
+              class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+              :class="pushSubscribed ? 'translate-x-5' : 'translate-x-0'"
+            />
+          </button>
+          <a v-else href="javascript:void(0)" class="text-xs text-gray-400 underline" @click="checkPush()">
+            새로고침
+          </a>
+        </div>
+
         <div>
           <label class="text-sm text-gray-500 block mb-1.5">알림 시간</label>
           <input

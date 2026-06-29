@@ -18,6 +18,13 @@ async function fetchBooks() {
   loading.value = false;
 }
 
+async function deleteAll() {
+  if (!user.value) return;
+  if (!confirm(`책 ${books.value.length}권을 모두 삭제할까요? 관련 세트와 기록도 함께 삭제됩니다.`)) return;
+  await supabase.from("books").delete().eq("user_id", user.value.id);
+  books.value = [];
+}
+
 onMounted(fetchBooks);
 </script>
 
@@ -36,7 +43,7 @@ onMounted(fetchBooks);
     <div v-if="loading" class="text-gray-400 text-sm">불러오는 중...</div>
 
     <div v-else-if="books.length === 0" class="text-center py-16 text-gray-400">
-      <p class="text-4xl mb-3">📖</p>
+      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
       <p>아직 책이 없어요. 첫 번째 책을 추가해보세요!</p>
     </div>
 
@@ -62,6 +69,10 @@ onMounted(fetchBooks);
             </svg>
           </NuxtLink>
         </div>
+      </div>
+
+      <div v-if="books.length >= 2" class="pt-2 text-center">
+        <button @click="deleteAll" class="text-sm text-gray-400 hover:text-red-500 transition-colors">전체 삭제</button>
       </div>
     </div>
   </div>

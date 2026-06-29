@@ -165,3 +165,20 @@ create index if not exists reading_sets_user_id_idx on reading_sets (user_id);
 create index if not exists reading_set_items_set_id_idx on reading_set_items (set_id);
 create index if not exists reading_logs_user_id_log_date_idx on reading_logs (user_id, log_date);
 create index if not exists reading_logs_set_id_log_date_idx on reading_logs (set_id, log_date);
+
+-- Push subscriptions
+create table if not exists push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  endpoint text not null,
+  p256dh text,
+  auth text,
+  created_at timestamptz default now(),
+  unique(user_id, endpoint)
+);
+
+alter table push_subscriptions enable row level security;
+
+drop policy if exists "Users manage own push subscriptions" on push_subscriptions;
+create policy "Users manage own push subscriptions" on push_subscriptions
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

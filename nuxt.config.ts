@@ -33,7 +33,18 @@ export default defineNuxtConfig({
     },
   },
 
+  runtimeConfig: {
+    vapidPrivateKey: process.env.VAPID_PRIVATE_KEY,
+    vapidSubject: process.env.VAPID_SUBJECT,
+    public: {
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY,
+    },
+  },
+
   pwa: {
+    strategies: "injectManifest",
+    srcDir: "public",
+    filename: "sw.js",
     registerType: "autoUpdate",
     manifest: {
       name: "re:read",
@@ -51,8 +62,7 @@ export default defineNuxtConfig({
         { src: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
       ],
     },
-    workbox: {
-      navigateFallback: "/",
+    injectManifest: {
       globPatterns: ["**/*.{js,css,html,png,svg,ico}"],
     },
     client: {
@@ -64,10 +74,4 @@ export default defineNuxtConfig({
     },
   },
 
-  runtimeConfig: {
-    public: {
-      supabaseUrl: process.env.SUPABASE_URL,
-      supabaseKey: process.env.SUPABASE_KEY,
-    },
-  },
 });

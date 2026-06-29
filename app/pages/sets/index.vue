@@ -34,6 +34,13 @@ function getStatus(set: ReadingSet) {
   return { label: "진행 중", color: "text-gray-700" };
 }
 
+async function deleteAll() {
+  if (!user.value) return;
+  if (!confirm(`세트 ${sets.value.length}개를 모두 삭제할까요? 관련 기록도 함께 삭제됩니다.`)) return;
+  await supabase.from("reading_sets").delete().eq("user_id", user.value.id);
+  sets.value = [];
+}
+
 onMounted(fetchSets);
 </script>
 
@@ -52,7 +59,7 @@ onMounted(fetchSets);
     <div v-if="loading" class="text-gray-400 text-sm">불러오는 중...</div>
 
     <div v-else-if="sets.length === 0" class="text-center py-16 text-gray-400">
-      <p class="text-4xl mb-3">📋</p>
+      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
       <p>아직 읽기 세트가 없어요.</p>
       <p class="text-sm mt-1">세트를 만들어 회독 계획을 시작해보세요.</p>
     </div>
@@ -102,6 +109,10 @@ onMounted(fetchSets);
             </svg>
           </NuxtLink>
         </div>
+      </div>
+
+      <div v-if="sets.length >= 2" class="pt-2 text-center">
+        <button @click="deleteAll" class="text-sm text-gray-400 hover:text-red-500 transition-colors">전체 삭제</button>
       </div>
     </div>
   </div>
