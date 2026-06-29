@@ -341,10 +341,8 @@ onMounted(fetchData);
         <button
           type="button"
           @click="toggleActive"
-          class="w-full text-sm py-3 transition-colors font-medium"
-          :class="currentSet?.is_active
-            ? 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-            : 'bg-gray-100 hover:bg-gray-200 text-black'"
+          class="w-full text-center text-sm py-2 bg-transparent transition-colors"
+          style="color:#999"
         >
           {{ currentSet?.is_active ? "일시중지" : "다시 시작" }}
         </button>
