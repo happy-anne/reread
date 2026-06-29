@@ -36,6 +36,9 @@ export function usePushNotification() {
       permission.value = perm
       if (perm !== 'granted') return
 
+      // 먼저 UI 반영
+      subscribed.value = true
+
       const reg = await navigator.serviceWorker.ready
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
@@ -53,8 +56,9 @@ export function usePushNotification() {
         },
         { onConflict: 'user_id,endpoint' },
       )
-
-      subscribed.value = true
+    } catch {
+      // 실패 시 롤백
+      subscribed.value = false
     } finally {
       loading.value = false
     }

@@ -153,11 +153,13 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
             v-if="pushPermission !== 'denied'"
             @click="pushSubscribed ? unsubscribePush() : subscribePush()"
             :disabled="pushLoading"
-            class="relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0"
+            class="relative w-11 h-6 transition-colors duration-200 flex-shrink-0"
+            style="border-radius:999px"
             :class="pushSubscribed ? 'bg-black' : 'bg-gray-200'"
           >
             <span
-              class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200"
+              class="absolute top-0.5 left-0.5 w-5 h-5 bg-white shadow transition-transform duration-200"
+              style="border-radius:999px"
               :class="pushSubscribed ? 'translate-x-5' : 'translate-x-0'"
             />
           </button>
