@@ -184,7 +184,7 @@ onMounted(fetchData);
     <form v-else @submit.prevent="save" class="space-y-2.5">
       <!-- 세트 이름 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-1.5">세트 이름</label>
+        <label class="text-sm font-medium text-black block mb-1.5">세트 이름</label>
         <input
           v-model="form.name"
           required
@@ -194,7 +194,7 @@ onMounted(fetchData);
 
       <!-- 세트 색상 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-3">세트 색상</label>
+        <label class="text-sm font-medium text-black block mb-3">세트 색상</label>
         <div class="flex gap-2 flex-wrap">
           <button
             v-for="c in SET_COLORS"
@@ -211,7 +211,7 @@ onMounted(fetchData);
 
       <!-- 책 선택 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-3">책 선택</label>
+        <label class="text-sm font-medium text-black block mb-3">책 선택</label>
         <div class="flex flex-wrap gap-1.5">
           <button
             v-for="book in books"
@@ -231,7 +231,7 @@ onMounted(fetchData);
 
       <!-- 읽는 순서 -->
       <div v-if="selectedBooks.length > 1" class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-2">읽는 순서 (드래그로 변경)</label>
+        <label class="text-sm font-medium text-black block mb-2">읽는 순서 (드래그로 변경)</label>
         <draggable v-model="selectedBooks" item-key="temp_id" handle=".drag-handle" class="space-y-2">
           <template #item="{ element, index }">
             <div class="flex items-center gap-3 bg-gray-100 px-4 py-3" style="border-radius:8px">
@@ -245,7 +245,7 @@ onMounted(fetchData);
 
       <!-- 회독 횟수 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-1.5">회독 횟수</label>
+        <label class="text-sm font-medium text-black block mb-1.5">회독 횟수</label>
         <input
           v-model.number="form.reread_count"
           type="number"
@@ -258,7 +258,7 @@ onMounted(fetchData);
 
       <!-- 기간 카드 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-3">기간</label>
+        <label class="text-sm font-medium text-black block mb-3">기간</label>
         <div class="grid grid-cols-2 gap-3 mb-3">
           <div>
             <p class="text-xs text-gray-400 mb-1">시작일</p>
@@ -289,7 +289,7 @@ onMounted(fetchData);
 
       <!-- 쉬는 날 -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <label class="text-sm font-semibold text-black block mb-3">쉬는 날</label>
+        <label class="text-sm font-medium text-black block mb-3">쉬는 날</label>
         <div class="flex gap-1.5">
           <button
             v-for="(label, idx) in DAY_LABELS"

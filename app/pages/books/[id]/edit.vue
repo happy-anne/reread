@@ -74,15 +74,15 @@ async function doDelete() {
     <form @submit.prevent="saveBook" class="space-y-4">
       <div class="bg-white rounded-2xl p-5 border border-gray-100 space-y-4">
         <div>
-          <label class="text-sm font-semibold text-black block mb-1.5">책 제목</label>
+          <label class="text-sm font-medium text-black block mb-1.5">책 제목</label>
           <input v-model="form.title" required class="w-full bg-gray-100 px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors" />
         </div>
         <div>
-          <label class="text-sm font-semibold text-black block mb-1.5">전체 쪽수</label>
+          <label class="text-sm font-medium text-black block mb-1.5">전체 쪽수</label>
           <input v-model="form.total_pages" type="number" min="1" required class="w-full bg-gray-100 px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors" />
         </div>
         <div>
-          <label class="text-sm font-semibold text-black block mb-1.5">시작 쪽</label>
+          <label class="text-sm font-medium text-black block mb-1.5">시작 쪽</label>
           <input v-model="form.start_page" type="number" min="1" required class="w-full bg-gray-100 px-4 py-3 text-sm outline-none focus:bg-gray-200 transition-colors" />
           <p v-if="form.total_pages && form.start_page" class="text-xs text-gray-400 mt-1">
             읽을 쪽수: {{ Math.max(0, parseInt(form.total_pages) - (parseInt(form.start_page) - 1)) }}쪽
