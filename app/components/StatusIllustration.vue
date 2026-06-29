@@ -69,7 +69,7 @@ const effectiveStatus = computed(() =>
 
     </div>
 
-    <p class="text-sm font-semibold mt-3" :style="{ color: config.color === '#DDDDDD' ? '#999' : config.color }">{{ config.label }}</p>
+    <p class="text-sm font-medium mt-3" :style="{ color: config.color === '#DDDDDD' ? '#999' : config.color }">{{ config.label }}</p>
     <!-- <p class="text-xs text-gray-400 mt-1 text-center px-4 leading-relaxed">{{ config.message }}</p> -->
   </div>
 </template>
