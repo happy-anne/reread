@@ -196,7 +196,7 @@ onMounted(fetchData);
     <div v-else-if="todaySchedules.length === 0" class="text-center py-16 text-gray-400">
       <img src="/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
       <p>오늘 진행 중인 읽기 세트가 없어요.</p>
-      <NuxtLink to="/sets" class="mt-2 px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-colors inline-block">
+      <NuxtLink to="/sets" class="mt-4 px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-colors inline-block">
         읽기 세트 만들기 →
       </NuxtLink>
     </div>
