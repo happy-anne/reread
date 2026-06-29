@@ -86,11 +86,14 @@ const stats = computed(() => {
   return { completed, totalLogged, totalPages, streak, completedSets };
 });
 
+// 시작일이 오늘 이전인 세트만 통계에 표시
 const selectableSets = computed(() => {
-  return [...sets.value].sort((a, b) => {
-    if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
-    return b.created_at.localeCompare(a.created_at);
-  });
+  return [...sets.value]
+    .filter((s) => s.start_date <= todayStr)
+    .sort((a, b) => {
+      if (a.is_active !== b.is_active) return a.is_active ? -1 : 1;
+      return b.created_at.localeCompare(a.created_at);
+    });
 });
 
 const selectedSetProgress = computed(() => {
@@ -168,9 +171,9 @@ onMounted(fetchAll);
     <h1 class="text-2xl font-bold mb-6">통계</h1>
 
     <!-- Empty state -->
-    <div v-if="isLoaded && sets.length === 0" class="flex flex-col items-center justify-center py-20 text-center gap-4">
+    <div v-if="isLoaded && selectableSets.length === 0" class="flex flex-col items-center justify-center py-20 text-center gap-4">
       <img src="/ico_doc.svg" class="w-14 h-14 mx-auto" style="opacity:0.3" alt="" />
-      <p class="text-gray-400 text-base">책과 세트를 등록하면<br>독서 통계를 볼 수 있어요.</p>
+      <p class="text-gray-400 text-base">읽기가 시작되면<br>통계를 볼 수 있어요.</p>
       <NuxtLink
         v-if="bookCount === 0"
         to="/books/new"
@@ -179,7 +182,7 @@ onMounted(fetchAll);
         책 등록하기
       </NuxtLink>
       <NuxtLink
-        v-else
+        v-else-if="sets.length === 0"
         to="/sets/new"
         class="mt-2 px-5 py-2.5 rounded-xl bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
       >
@@ -187,7 +190,7 @@ onMounted(fetchAll);
       </NuxtLink>
     </div>
 
-    <template v-if="!isLoaded || sets.length > 0">
+    <template v-if="!isLoaded || selectableSets.length > 0">
     <!-- Set selector -->
     <div v-if="selectableSets.length > 0" class="bg-white rounded-2xl p-4 border border-gray-100 mb-4">
       <select
@@ -264,7 +267,7 @@ onMounted(fetchAll);
         <div class="flex items-center gap-1">
           <button
             @click="currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`; fetchMonthLogs()"
-            class="text-xs text-gray-400 hover:text-gray-900 px-2 py-0.5 rounded-full border border-gray-200 hover:border-gray-400 transition-colors"
+            class="text-gray-400 hover:text-gray-900 px-2 py-0.5 rounded-full border border-gray-200 hover:border-gray-400 transition-colors" style="font-size:11px"
           >오늘</button>
           <button @click="nextMonth" class="text-gray-500 hover:text-gray-900 px-2">›</button>
         </div>
