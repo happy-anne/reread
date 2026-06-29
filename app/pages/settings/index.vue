@@ -142,7 +142,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
         <!-- 푸시 알림 토글 -->
         <div v-if="pushSupported" class="flex items-center justify-between mb-4">
           <div>
-            <p class="font-semibold text-black">푸시 알림</p>
+            <p class="font-semibold text-black" style="font-size:17px">푸시 알림</p>
             <p class="text-xs mt-0.5" :class="pushPermission === 'denied' ? 'text-red-400' : 'text-gray-400'">
               <template v-if="pushPermission === 'denied'">브라우저에서 알림을 차단했어요</template>
               <template v-else-if="pushSubscribed">알림이 켜져 있어요</template>
@@ -181,7 +181,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 
       <!-- Rest days -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <h2 class="font-semibold text-black mb-1">기본 쉬는 날</h2>
+        <h2 class="font-semibold text-black mb-1" style="font-size:17px">기본 쉬는 날</h2>
         <p class="text-gray-400 text-xs mb-3">새 읽기 세트에 기본 적용돼요. 각 세트에서 변경할 수 있어요.</p>
         <div class="flex gap-1.5">
           <button
@@ -212,7 +212,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 
       <!-- Security -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <h2 class="font-semibold text-black mb-1">보안</h2>
+        <h2 class="font-semibold text-black mb-1" style="font-size:17px">보안</h2>
         <p class="text-gray-400 text-xs mb-4">
           매번 로그인하지 않도록 4자리 PIN으로 앱을 빠르게 잠금 해제할 수 있어요.
         </p>
@@ -241,7 +241,7 @@ onUnmounted(() => window.removeEventListener("keydown", onPinKeydown));
 
       <!-- Account -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <h2 class="font-semibold text-black mb-1">계정</h2>
+        <h2 class="font-semibold text-black mb-1" style="font-size:17px">계정</h2>
         <p class="text-gray-500 text-sm mb-1">{{ user?.email }}</p>
         <p v-if="daysRemaining !== null" class="text-xs mb-4" :class="daysRemaining <= 5 ? 'text-yellow-500' : 'text-gray-400'">
           로그인 세션 D-{{ daysRemaining }}
