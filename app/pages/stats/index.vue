@@ -172,7 +172,7 @@ onMounted(fetchAll);
 
     <!-- Empty state -->
     <div v-if="isLoaded && selectableSets.length === 0" class="flex flex-col items-center justify-center py-20 text-center gap-4">
-      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto" style="opacity:0.3" alt="" />
+      <img src="~/assets/images/ico_doc.svg" class="w-14 h-14 mx-auto" style="opacity:0.3" alt="" />
       <p class="text-gray-400 text-sm">읽기가 시작되면<br>통계를 볼 수 있어요.</p>
       <NuxtLink
         v-if="bookCount === 0"

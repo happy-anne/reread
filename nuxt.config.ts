@@ -29,7 +29,10 @@ export default defineNuxtConfig({
         { name: "description", content: "Read again. With a plan." },
         { name: "theme-color", content: "#0f172a" },
       ],
-      link: [{ rel: "icon", type: "image/png", href: "/favicon.png" }],
+      link: [
+        { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+        { rel: "icon", type: "image/png", href: "/favicon.png" },
+      ],
     },
   },
 

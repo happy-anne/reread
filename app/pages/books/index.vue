@@ -43,7 +43,7 @@ onMounted(fetchBooks);
     <div v-if="loading" class="text-gray-400 text-sm">불러오는 중...</div>
 
     <div v-else-if="books.length === 0" class="text-center py-16 text-gray-400">
-      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
+      <img src="~/assets/images/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
       <p>아직 책이 없어요. 첫 번째 책을 추가해보세요!</p>
     </div>
 

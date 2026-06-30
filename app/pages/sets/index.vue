@@ -59,7 +59,7 @@ onMounted(fetchSets);
     <div v-if="loading" class="text-gray-400 text-sm">불러오는 중...</div>
 
     <div v-else-if="sets.length === 0" class="text-center py-16 text-gray-400">
-      <img src="/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
+      <img src="~/assets/images/ico_doc.svg" class="w-14 h-14 mx-auto mb-3" style="opacity:0.3" alt="" />
       <p>아직 읽기 세트가 없어요.</p>
       <p class="text-sm mt-1">세트를 만들어 회독 계획을 시작해보세요.</p>
     </div>
