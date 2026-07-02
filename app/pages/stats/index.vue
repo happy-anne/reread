@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ReadingLog, ReadingSet, ReadingSetItem } from "~/types";
-import { calcTotalPages } from "~/composables/useScheduler";
+import { calcTotalPages, computeLiveSchedule } from "~/composables/useScheduler";
 import { getSetColor } from "~/composables/useSetColor";
 
 const supabase = useSupabaseClient();
@@ -58,22 +58,29 @@ const calendarDays = computed(() => {
   return days;
 });
 
+const scopedLogs = computed(() => {
+  if (!selectedSetId.value) return allLogs.value;
+  return allLogs.value.filter((l) => l.set_id === selectedSetId.value);
+});
+
 const stats = computed(() => {
-  const completed = allLogs.value.filter((l) => l.status === "completed").length;
-  const totalLogged = allLogs.value.filter((l) => l.status !== "passed").length;
-  const totalPages = allLogs.value.reduce((s, l) => {
+  const logs = scopedLogs.value;
+  const completed = logs.filter((l) => l.status === "completed").length;
+  const totalLogged = logs.filter((l) => l.status !== "passed").length;
+  const totalPages = logs.reduce((s, l) => {
     if (l.actual_page) return s + (l.actual_page - l.target_start_page + 1);
     return s;
   }, 0);
 
-  const sortedLogs = [...allLogs.value]
-    .filter((l) => l.status === "completed" || l.status === "partial")
-    .sort((a, b) => b.log_date.localeCompare(a.log_date));
+  // 같은 날짜에 세트별로 로그가 여러 개 있어도 하루는 하루로만 센다
+  const uniqueDates = [...new Set(
+    logs.filter((l) => l.status === "completed" || l.status === "partial").map((l) => l.log_date)
+  )].sort((a, b) => b.localeCompare(a));
 
   let streak = 0;
-  let cur = new Date();
-  for (const log of sortedLogs) {
-    const logDate = new Date(log.log_date);
+  let cur = new Date(`${todayStr}T00:00:00`);
+  for (const dateStr of uniqueDates) {
+    const logDate = new Date(`${dateStr}T00:00:00`);
     const diff = Math.round((cur.getTime() - logDate.getTime()) / 86400000);
     if (diff <= 1) {
       streak++;
@@ -81,7 +88,8 @@ const stats = computed(() => {
     } else break;
   }
 
-  const completedSets = sets.value.filter((s) => s.end_date < todayStr).length;
+  const relevantSets = selectedSetId.value ? sets.value.filter((s) => s.id === selectedSetId.value) : sets.value;
+  const completedSets = relevantSets.filter((s) => s.end_date < todayStr).length;
 
   return { completed, totalLogged, totalPages, streak, completedSets };
 });
@@ -100,12 +108,18 @@ const selectedSetProgress = computed(() => {
   const set = sets.value.find((s) => s.id === selectedSetId.value);
   if (!set) return null;
 
-  const setLogs = allLogs.value.filter((l) => l.set_id === set.id && l.actual_page != null);
-  const pagesRead = setLogs.reduce((sum, l) => sum + (l.actual_page! - l.target_start_page + 1), 0);
+  const setLogs = allLogs.value.filter((l) => l.set_id === set.id);
+  const readLogs = setLogs.filter((l) => l.actual_page != null);
+  const pagesRead = readLogs.reduce((sum, l) => sum + (l.actual_page! - l.target_start_page + 1), 0);
   const totalPages = calcTotalPages(set.items ?? [], set.reread_count);
   const percent = totalPages > 0 ? Math.min(100, (pagesRead / totalPages) * 100) : 0;
 
-  return { name: set.name, pagesRead, totalPages, percent };
+  const todayLog = setLogs.find((l) => l.log_date === todayStr);
+  const currentBookTitle = todayLog
+    ? set.items?.find((i) => i.book_id === todayLog.book_id)?.book?.title ?? ""
+    : computeLiveSchedule(set, set.items ?? [], todayStr, setLogs)?.book_title ?? "";
+
+  return { name: set.name, pagesRead, totalPages, percent, rereadCount: set.reread_count, currentBookTitle };
 });
 
 watch(selectableSets, (list) => {
@@ -192,15 +206,19 @@ onMounted(fetchAll);
 
     <template v-if="!isLoaded || selectableSets.length > 0">
     <!-- Set selector -->
-    <div v-if="selectableSets.length > 0" class="bg-white rounded-2xl p-4 border border-gray-100 mb-4">
-      <select
-        v-model="selectedSetId"
-        class="stats-select w-full outline-none transition-colors"
+    <div v-if="selectableSets.length > 0" class="flex gap-2 overflow-x-auto mb-4" style="scrollbar-width:none">
+      <button
+        v-for="set in selectableSets"
+        :key="set.id"
+        type="button"
+        @click="selectedSetId = set.id"
+        class="flex-shrink-0 px-3.5 py-2 rounded-full font-medium transition-colors whitespace-nowrap"
+        style="font-size:14px"
+        :class="selectedSetId === set.id ? 'text-white' : 'bg-white text-gray-500 border border-gray-200'"
+        :style="selectedSetId === set.id ? 'background-color:#000' : ''"
       >
-        <option v-for="set in selectableSets" :key="set.id" :value="set.id">
-          {{ set.name }}{{ set.is_active ? "" : " (일시중지)" }}
-        </option>
-      </select>
+        {{ set.name }}{{ set.is_active ? "" : " (일시중지)" }}
+      </button>
     </div>
 
     <!-- Set progress -->
@@ -230,8 +248,8 @@ onMounted(fetchAll);
               </svg>
             </NuxtLink>
           </div>
-          <p class="mt-0.5" style="color:#999;font-size:14px">
-            {{ selectedSetProgress.pagesRead.toLocaleString() }}/{{ selectedSetProgress.totalPages.toLocaleString() }}쪽 · {{ sets.length }}세트
+          <p class="mt-0.5 truncate" style="color:#999;font-size:14px">
+            <template v-if="selectedSetProgress.currentBookTitle">{{ selectedSetProgress.currentBookTitle }} · </template>{{ selectedSetProgress.pagesRead.toLocaleString() }}/{{ selectedSetProgress.totalPages.toLocaleString() }}쪽 · {{ selectedSetProgress.rereadCount }}회독
           </p>
         </div>
       </div>
@@ -337,17 +355,3 @@ onMounted(fetchAll);
     </template>
   </div>
 </template>
-
-<style scoped>
-.stats-select {
-  appearance: none;
-  -webkit-appearance: none;
-  background: #FFF;
-  padding: 0;
-  padding-right: 24px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%236B7684' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%2F%3E%3C%2Fsvg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0 center;
-  background-size: 18px;
-}
-</style>
