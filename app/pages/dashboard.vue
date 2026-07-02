@@ -54,6 +54,9 @@ async function fetchData() {
     const liveSchedule = computeLiveSchedule(set, set.items, today, setLogs);
 
     const todayLog = setLogs.find((l) => l.log_date === today);
+    if (todayLog && todayLog.actual_page != null) {
+      pageInput.value[set.id] = todayLog.actual_page;
+    }
     const schedule: DailySchedule | null = todayLog
       ? {
           date: today,
@@ -254,8 +257,8 @@ onMounted(fetchData);
             v-if="pageInput[set_id]"
             @click="saveProgress(set_id, schedule, pageInput[set_id]!)"
             :disabled="saving[set_id]"
-            class="disabled:opacity-40 text-white font-medium px-1.5 py-1.5 text-sm transition-colors"
-            style="background-color:#000"
+            class="disabled:opacity-40 text-white font-medium px-1.5 py-1.5 transition-colors"
+            style="background-color:#000;font-size:15px"
           >
             저장
           </button>
