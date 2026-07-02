@@ -77,7 +77,7 @@ onMounted(fetchSets);
             :style="{ backgroundColor: getSetColor(set.color).hex }"
           /> -->
           <div>
-            <h3 class="font-semibold text-black" style="font-size:18px">{{ set.name }}</h3>
+            <NuxtLink :to="`/sets/${set.id}/view`" class="font-semibold text-black hover:underline" style="font-size:18px">{{ set.name }}</NuxtLink>
             <p class="text-gray-400 mt-0.5" style="font-size:14px">
               {{ set.reread_count }}회독 • {{ set.start_date }} ~ {{ set.end_date }}
             </p>
